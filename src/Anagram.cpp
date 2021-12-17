@@ -22,7 +22,7 @@ namespace
         // sort will not compare things that only have one letter, but it still needs to be lowercase
         if ( word.size() == 1 ) return std::string { std::tolower ( word [0], loc ) };
 
-        const auto comparatorMod = [&loc] ( char& a, char& b ) {
+        const auto comparatorMod = [&loc] ( auto& a, auto& b ) {
             a = std::tolower ( a, loc );
             b = std::tolower ( b, loc );
 
