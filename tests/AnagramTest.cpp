@@ -52,7 +52,6 @@ TEST ( AnagramTest, RepeatedLetterTest )
     result = anagram.lookup ( "A" );
     EXPECT_EQ ( result.size(), 1 );
     EXPECT_EQ ( result[0], "a" );
-
 }
 
 TEST ( AnagramTest, SubwordTest )
@@ -65,5 +64,19 @@ TEST ( AnagramTest, SubwordTest )
     auto result = anagram.lookup ( "act" );
     EXPECT_EQ ( result.size(), 1 );
     EXPECT_EQ ( result[0], "cat" );
+}
 
+TEST ( AnagramTest, NonEnglishCharactersTest )
+{
+    hemiola::Anagram anagram;
+
+    anagram.insert ( "actor" );
+    anagram.insert ( "cät" );
+
+    auto result = anagram.lookup ( "act" );
+    EXPECT_EQ ( result.size(), 0 );
+
+    result = anagram.lookup ( "äct" );
+    EXPECT_EQ ( result.size(), 1 );
+    EXPECT_EQ ( result[0], "cät" );
 }
