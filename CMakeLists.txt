@@ -7,6 +7,7 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/erichlf/Hemiola")
 option(BUILD_SHARED_LIBS "Build as shared library" ON)
 
 include(ExternalProject)
+find_package(Git REQUIRED)
 
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 
