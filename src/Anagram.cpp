@@ -3,10 +3,14 @@
 #include <algorithm>
 #include <iostream>
 #include <locale>
+#include <utility>
+
 #include <nuspell/dictionary.hxx>
 #include <nuspell/finder.hxx>
 
 using namespace hemiola;
+
+using ListOfDicts = std::vector<std::pair<std::string, std::string>>;
 
 namespace
 {
@@ -39,10 +43,12 @@ namespace
         return sorted;
     }
 
-    [[maybe_unused]]std::string findDictionaries ( const std::string& dict )
+    [[maybe_unused]] ListOfDicts::const_iterator findDictionary ( const std::string& dict )
     {
-        auto dict_finder = nuspell::Finder::search_all_dirs_for_dicts();
-        return dict_finder.get_dictionary_path ( dict );
+        ListOfDicts dictList;
+        nuspell::search_default_dirs_for_dicts ( dictList );
+        auto dictIter = nuspell::find_dictionary ( dictList, dict );
+        return dictIter;
     }
 }
 
