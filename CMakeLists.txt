@@ -12,6 +12,7 @@ find_package(Git REQUIRED)
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 
 ExternalProject_Add(nuspell
+    PREFIX ${EXTERNAL_INSTALL_LOCATION}
     GIT_REPOSITORY https://github.com/nuspell/nuspell
     GIT_TAG "v5.0.1"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
@@ -26,9 +27,9 @@ add_library(hemiola
 
 add_dependencies(hemiola nuspell)
 
-find_package(Nuspell HINTS ${EXTERNAL_INSTALL_LOCATION} )
+add_library(Nuspell::nuspell SHARED IMPORTED)
 
-target_link_libraries(hemiola Nuspell::nuspell)
+target_link_libraries(hemiola ${EXTERNAL_INSTALL_LOCATION}/lib/libnuspell.so)
 
 target_include_directories(hemiola
     PUBLIC
