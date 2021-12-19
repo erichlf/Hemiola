@@ -74,7 +74,7 @@ sudo python3 testHID.py
 ```
 3. on the machine connected to the rpi you should see
 ```
-aAbB cd
-ef
+Hemiola
+works
 ```
 in the editor that you left open.
