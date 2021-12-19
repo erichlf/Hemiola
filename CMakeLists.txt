@@ -23,7 +23,10 @@ link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
 
 add_library(hemiola
     SHARED
-    src/Anagram.cpp)
+    src/Anagram.cpp
+    src/Device.cpp
+    src/KeyTable.cpp
+    src/KeyboardEvents.cpp)
 
 add_dependencies(hemiola nuspell)
 

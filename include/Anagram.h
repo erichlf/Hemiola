@@ -6,6 +6,9 @@
 
 namespace hemiola
 {
+    /*!
+     * @brief class for determining the anagrams of a given string
+     */
     class Anagram
     {
     public:
@@ -31,4 +34,4 @@ namespace hemiola
     private:
         std::unordered_map<std::string, std::vector<std::string>> m_Anagrams;
     };
-}
+}  // namespace hemiola
