@@ -139,7 +139,7 @@ std::string hemiola::Device::getInputDevice()
     return devices.top().first;
 }
 
-void hemiola::Device::read ( input_event& event ) const
+void hemiola::Device::read ( input_event& event )
 {
     assert ( m_Opened );
 

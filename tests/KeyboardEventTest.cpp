@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "KeyboardEvents.h"
-#include "fakes/FakeDevice.h"
+#include "FakeDevice.h"
 
 #include <exception>
 #include <iostream>

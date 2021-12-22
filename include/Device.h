@@ -38,7 +38,7 @@ namespace hemiola
          * @throw IoException if we are unable to read from device
          * @assumption device has been opened for reading
          */
-        virtual void read ( input_event& event ) const;
+        virtual void read ( input_event& event );
 
     private:
         /*!
