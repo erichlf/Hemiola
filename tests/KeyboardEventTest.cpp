@@ -32,6 +32,7 @@ TEST ( KeyboardEventTest, KeyPressTest )
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE } );
     expectedData.emplace_back ( wchar_t ( '\\' ) );
 
+    // ctrl + c
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE } );
     expectedData.emplace_back ( (unsigned short)KEY_RIGHTCTRL );
@@ -41,6 +42,7 @@ TEST ( KeyboardEventTest, KeyPressTest )
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE } );
     expectedData.emplace_back ( (unsigned short)KEY_F12 );
 
+    // shift + z
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE } );
     expectedData.emplace_back ( wchar_t ( 'Z' ) );
@@ -51,7 +53,6 @@ TEST ( KeyboardEventTest, KeyPressTest )
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE } );
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE } );
     expectedData.emplace_back ( wchar_t ( '=' ) );
-
 
     device->setData ( data );
     // receivedData will be the reverse of this data, because I didn't use a queue
