@@ -62,7 +62,7 @@ namespace hemiola
          * @param code the scan code from key press
          * @return true if the code is valid
          */
-        bool isCodeValid ( unsigned int code ) const { return code < sizeof ( m_CharOrFunc ); }
+        bool isCodeValid ( unsigned int code ) const { return code < m_CharOrFunc.size(); }
 
     private:
         /*!

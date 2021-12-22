@@ -48,6 +48,8 @@ void hemiola::KeyboardEvents::captureEvent (
     if ( !m_KeyState.scanCodeOk ) {  // keycode out of range, log error
         std::cerr << "Keycode out of range: <E-" << scanCode << ">\n";
         onEvent ( scanCode );
+
+        return;
     }
 
     // on key press
@@ -55,13 +57,18 @@ void hemiola::KeyboardEvents::captureEvent (
          || ( m_KeyState.ctrl && ( scanCode == KEY_C || scanCode == KEY_D ) ) ) {
         // on ENTER key or Ctrl+C/Ctrl+D event
         onEvent ( scanCode );
+
+        return;
     }
 
     if ( m_KeyTable->isCharKey ( scanCode ) ) {
         onEvent ( m_KeyState.key );
     } else if ( m_KeyTable->isFuncKey ( scanCode ) || scanCode == KEY_SPACE
                 || scanCode == KEY_TAB ) {
-        onEvent ( scanCode );
+        // we don't want to send altgr or shift keys since m_KeyState.key will have that
+        if ( scanCode != KEY_LEFTSHIFT && scanCode != KEY_RIGHTSHIFT && scanCode != KEY_RIGHTALT ) {
+            onEvent ( scanCode );
+        }
     } else {
         std::cerr << "Unknown keycode: <E-" << scanCode << ">\n";
         onEvent ( scanCode );
@@ -108,14 +115,16 @@ bool hemiola::KeyboardEvents::updateKeyState()
     m_KeyState.repeats = 0;
 
     m_KeyState.scanCodeOk = m_KeyTable->isCodeValid ( scanCode );
-    if ( !m_KeyState.scanCodeOk )
+    if ( !m_KeyState.scanCodeOk ) {
         return true;
+    }
 
     m_KeyState.key = 0;
 
     if ( m_KeyState.event.value != EV_MAKE )
         return updateKeyState();
 
+    wchar_t wch {};
     switch ( scanCode ) {
         case KEY_CAPSLOCK:
             m_KeyState.capslock = !m_KeyState.capslock;
@@ -132,11 +141,9 @@ bool hemiola::KeyboardEvents::updateKeyState()
             m_KeyState.ctrl = true;
             break;
         default:
-            wchar_t wch = m_KeyTable->handleScanCode ( scanCode, m_KeyState );
-            if ( iswblank ( wch ) ) {
-                m_KeyState.key = wch;
-            }
+            wch = m_KeyTable->handleScanCode ( scanCode, m_KeyState );
     }
+    m_KeyState.key = wch;
 
     return true;
 }

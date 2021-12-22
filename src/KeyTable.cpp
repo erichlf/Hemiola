@@ -100,62 +100,69 @@ void hemiola::KeyTable::determineSystemKeymap()
 
 bool hemiola::KeyTable::isCharKey ( unsigned int code ) const
 {
-    assert ( code < sizeof ( m_CharOrFunc ) );
+    if ( code > m_CharOrFunc.size() ) {
+        return false;
+    }
     return ( m_CharOrFunc [code] == 'c' );
 }
 
 bool hemiola::KeyTable::isFuncKey ( unsigned int code ) const
 {
-    assert ( code < sizeof ( m_CharOrFunc ) );
+    if ( code > m_CharOrFunc.size() ) {
+        return false;
+    }
     return ( m_CharOrFunc [code] == 'f' );
 }
 
 bool hemiola::KeyTable::isUsedKey ( unsigned int code ) const
 {
-    assert ( code < sizeof ( m_CharOrFunc ) );
+    if ( code > m_CharOrFunc.size() ) {
+        return false;
+    }
     return ( m_CharOrFunc [code] != '_' );
 }
 
 int hemiola::KeyTable::toCharKeysIndex ( unsigned int code ) const
 {
+    int index = -1;  // not character code
     if ( code >= KEY_1
          && code <= KEY_EQUAL )  // codes 2-13: US keyboard: 1, 2, ..., 0, -, =
-        return code - 2;
+        index = code - 2;
     if ( code >= KEY_Q && code <= KEY_RIGHTBRACE )  // codes 16-27: q, w, ..., [, ]
-        return code - 4;
+        index = code - 4;
     if ( code >= KEY_A && code <= KEY_GRAVE )  // codes 30-41: a, s, ..., ', `
-        return code - 6;
+        index = code - 6;
     if ( code >= KEY_BACKSLASH && code <= KEY_SLASH )  // codes 43-53: \, z, ..., ., /
-        return code - 7;
+        index = code - 7;
 
     if ( code == KEY_102ND )
-        return 47;  // key right to the left of 'Z' on US layout
+        index = 47;  // key right to the left of 'Z' on US layout
 
-    return -1;  // not character code
+    return index;
 }
 
 inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
 {
+    int index = -1;  // not character code
     if ( code == KEY_ESC )  // 1
-        return 0;
+        index = 0;
     if ( code >= KEY_BACKSPACE && code <= KEY_TAB )  // 14-15
-        return code - 13;
+        index = code - 13;
     if ( code >= KEY_ENTER && code <= KEY_LEFTCTRL )  // 28-29
-        return code - 25;
+        index = code - 25;
     if ( code == KEY_LEFTSHIFT )
-        return code - 37;                                  // 42
+        index = code - 37;                                  // 42
     if ( code >= KEY_RIGHTSHIFT && code <= KEY_KPDOT )  // 54-83
-        return code - 48;
+        index = code - 48;
     if ( code >= KEY_F11 && code <= KEY_F12 )  // 87-88
-        return code - 51;
+        index = code - 51;
     if ( code >= KEY_KPENTER && code <= KEY_DELETE )  // 96-111
-        return code - 58;
+        index = code - 58;
     if ( code == KEY_PAUSE )  // 119
-        return code - 65;
+        index = code - 65;
     if ( code >= KEY_LEFTMETA && code <= KEY_COMPOSE )  // 125-127
-        return code - 70;
-
-    return -1;  // not function key code
+        index = code - 70;
+    return index;
 }
 
 wchar_t hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& keyState ) const
