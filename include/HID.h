@@ -11,6 +11,11 @@ namespace hemiola
     {
     public:
         HID();
+        /*
+         * @brief CTOR to setup our hid
+         * @param the device location
+         */
+        explicit HID ( const std::string& device );
         HID ( const HID& ) = delete;
         HID ( HID&& ) = delete;
         HID& operator= ( const HID& ) = delete;

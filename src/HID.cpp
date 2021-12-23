@@ -8,10 +8,14 @@
 
 using namespace hemiola;
 
-hemiola::HID::HID()
+hemiola::HID::HID ( const std::string& device )
     : m_HIDId { -1 }
-    , m_HIDString {}
+    , m_HIDString { device }
     , m_Opened { false }
+{}
+
+hemiola::HID::HID()
+    : HID ( "" )
 {}
 
 hemiola::HID::~HID()
