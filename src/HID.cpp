@@ -25,6 +25,7 @@ hemiola::HID::~HID()
 
 void hemiola::HID::open ( int perms )
 {
+    assert ( !m_HIDString.empty() );
     assert ( !m_Opened );
 
     // open input device for reading
