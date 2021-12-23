@@ -27,7 +27,8 @@ add_library(hemiola
     src/HID.cpp
     src/InputHID.cpp
     src/KeyTable.cpp
-    src/KeyboardEvents.cpp)
+    src/KeyboardEvents.cpp
+    src/OutputHID.cpp)
 
 add_dependencies(hemiola nuspell)
 
