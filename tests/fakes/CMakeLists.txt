@@ -1,6 +1,6 @@
 add_library(fakes
     SHARED
-    FakeDevice.cpp)
+    FakeInputHID.cpp)
 
 target_include_directories(fakes
     PUBLIC

@@ -1,4 +1,4 @@
-#include "Device.h"
+#include "InputHID.h"
 
 #include "Exceptions.h"
 #include "Utils.h"
@@ -13,45 +13,23 @@
 #include <unistd.h>
 #include <utility>
 
-using namespace hemiola;
-using ScoredDevice = std::pair<std::string, unsigned short>;
+#include <linux/input.h>
 
-hemiola::Device::Device()
-    : m_DeviceId { -1 }
-    , m_DeviceString {}
-    , m_Opened { false }
+using namespace hemiola;
+using ScoredHID = std::pair<std::string, unsigned short>;
+
+hemiola::InputHID::InputHID()
+    : HID()
 {}
 
-hemiola::Device::~Device()
+void hemiola::InputHID::open()
 {
-    close();
+    m_HIDString = getInputHID();
+
+    HID::open ( O_RDONLY );
 }
 
-void hemiola::Device::open()
-{
-    assert ( !m_Opened );
-
-    m_DeviceString = getInputDevice();
-
-    // open input device for reading
-    m_DeviceId = ::open ( m_DeviceString.c_str(), O_RDONLY );
-
-    if ( m_DeviceId == -1 ) {
-        throw IoException ( "Error opening input event device '" + m_DeviceString + "'", errno );
-    }
-
-    m_Opened = true;
-}
-
-void hemiola::Device::close()
-{
-    if ( m_Opened ) {
-        ::close ( m_DeviceId );
-        m_Opened = false;
-    }
-}
-
-std::string hemiola::Device::getInputDevice()
+std::string hemiola::InputHID::getInputHID()
 {
     // better be safe than sory: while running other programs, switch user to nobody from root
     setegid ( 65534 );
@@ -75,10 +53,10 @@ std::string hemiola::Device::getInputDevice()
         throw;
     }
 
-    auto comparator = [] ( const ScoredDevice& dev1, const ScoredDevice& dev2 ) {
+    auto comparator = [] ( const ScoredHID& dev1, const ScoredHID& dev2 ) {
         return dev1.second > dev2.second;
     };
-    std::priority_queue<ScoredDevice, std::vector<ScoredDevice>, decltype ( comparator )> devices (
+    std::priority_queue<ScoredHID, std::vector<ScoredHID>, decltype ( comparator )> devices (
         comparator );
     std::string line;
 
@@ -137,11 +115,11 @@ std::string hemiola::Device::getInputDevice()
     return devices.top().first;
 }
 
-void hemiola::Device::read ( input_event& event )
+void hemiola::InputHID::read ( input_event& event )
 {
     assert ( m_Opened );
 
-    if ( ::read ( m_DeviceId, &event, sizeof ( struct input_event ) ) <= 0 ) {
+    if ( ::read ( m_HIDId, &event, sizeof ( struct input_event ) ) <= 0 ) {
         throw IoException ( "Unable to read from input device.", errno );
     }
 }
