@@ -7,7 +7,7 @@
 
 #include <linux/input.h>
 
-#include "Device.h"
+#include "InputHID.h"
 #include "KeyTable.h"
 
 namespace hemiola
@@ -37,7 +37,7 @@ namespace hemiola
     {
     public:
         explicit KeyboardEvents ( std::shared_ptr<KeyTable> keyTable );
-        KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, std::shared_ptr<Device> device );
+        KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, std::shared_ptr<InputHID> device );
         KeyboardEvents ( const KeyboardEvents& ) = delete;
         KeyboardEvents ( KeyboardEvents&& ) = delete;
         KeyboardEvents& operator= ( const KeyboardEvents& ) = delete;
@@ -84,6 +84,6 @@ namespace hemiola
         /*!
          * @brief input device we are capturing keys from
          */
-        std::shared_ptr<Device> m_Device;
+        std::shared_ptr<InputHID> m_InputHID;
     };
 }  // namespace hemiola

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "Exceptions.h"
-#include "FakeDevice.h"
+#include "FakeInputHID.h"
 #include "KeyboardEvents.h"
 #include "Utils.h"
 
@@ -14,7 +14,7 @@
 
 TEST ( KeyboardEventTest, KeyPressTest )
 {
-    auto device = std::make_shared<hemiola::FakeDevice>();
+    auto device = std::make_shared<hemiola::FakeInputHID>();
 
     std::vector<input_event> data;
     std::vector<std::variant<wchar_t, unsigned short>> expectedData;

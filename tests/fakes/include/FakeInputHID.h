@@ -1,25 +1,23 @@
 #pragma once
 
-#include "Device.h"
+#include "InputHID.h"
 
 #include <vector>
-
-#include <linux/input.h>
 
 namespace hemiola
 {
     /*!
-     * @brief Class which spoof Device for testing purposes
+     * @brief Class which spoof InputHID for testing purposes
      */
-    class FakeDevice : public Device
+    class FakeInputHID : public InputHID
     {
     public:
-        FakeDevice();
-        FakeDevice ( const FakeDevice& ) = delete;
-        FakeDevice ( FakeDevice&& ) = delete;
-        FakeDevice& operator= ( const FakeDevice& ) = delete;
-        FakeDevice& operator= ( FakeDevice&& ) = delete;
-        ~FakeDevice() = default;
+        FakeInputHID();
+        FakeInputHID ( const FakeInputHID& ) = delete;
+        FakeInputHID ( FakeInputHID&& ) = delete;
+        FakeInputHID& operator= ( const FakeInputHID& ) = delete;
+        FakeInputHID& operator= ( FakeInputHID&& ) = delete;
+        ~FakeInputHID() = default;
 
         /*!
          * @brief open device for reading

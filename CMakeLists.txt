@@ -24,7 +24,8 @@ link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
 add_library(hemiola
     SHARED
     src/Anagram.cpp
-    src/Device.cpp
+    src/HID.cpp
+    src/InputHID.cpp
     src/KeyTable.cpp
     src/KeyboardEvents.cpp)
 

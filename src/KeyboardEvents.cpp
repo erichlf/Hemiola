@@ -16,12 +16,12 @@ using namespace hemiola;
 
 hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable )
     : m_KeyTable ( std::move ( keyTable ) )
-    , m_Device ( std::make_shared<Device>() )
+    , m_InputHID ( std::make_shared<InputHID>() )
 {}
 
-hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, std::shared_ptr<Device> device )
+hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, std::shared_ptr<InputHID> device )
     : m_KeyTable ( std::move ( keyTable ) )
-    , m_Device ( std::move ( device ) )
+    , m_InputHID ( std::move ( device ) )
 {}
 
 void hemiola::KeyboardEvents::capture (
@@ -29,13 +29,13 @@ void hemiola::KeyboardEvents::capture (
     std::function<void ( std::exception_ptr )> onError )
 {
     try {
-        m_Device->open();
+        m_InputHID->open();
         while ( updateKeyState() ) {
             captureEvent ( onEvent );
         }
     } catch ( ... ) {
         std::cerr << "Input device closed unexpectedly.\n";
-        m_Device->close();
+        m_InputHID->close();
         onError ( std::current_exception() );
     }
 }
@@ -78,7 +78,7 @@ void hemiola::KeyboardEvents::captureEvent (
 bool hemiola::KeyboardEvents::updateKeyState()
 {
     try {
-        m_Device->read ( m_KeyState.event );
+        m_InputHID->read ( m_KeyState.event );
     } catch ( ... ) {
         std::cerr << "Connection to keyboard seems to have been lost while updating key state.\n";
         throw;
