@@ -12,6 +12,7 @@ things.
   - C++ 17 compiler, GCC >= v8, Clang >= v7, MSVC >= 2017
   - CMake >= v3.12
   - ICU4C
+
 ## Building on GNU/Linux and Unixes
 
 We first need to download the dependencies. Some may already be
@@ -38,3 +39,42 @@ cmake -B ./build .
 cmake --build ./build
 cmake --install ./build
 ```
+
+# Setting Up HID
+## Dependencies
+  - Raspberry Pi Zero Running Raspberry Pi OS
+  - Micro USB Cable
+
+## Setting up Raspberry Pi
+
+```
+ssh pi@<ip-address-of-rpi>
+
+sudo apt install git
+
+git clone https://github.com/erichlf/hemiola
+cd hemiola/hid
+
+chmod +x install.sh
+chmod +x enableModules.sh
+
+sudo ./install.sh
+
+sudo shutdown
+```
+
+Now plug your raspberry pi into your computer. To test that things are working:
+1. on the machine connected to the rpi open a text editor and let it sit open
+2. on a separate machine from the one that is connected to your rpi
+```
+ssh pi@<ip-address-of-rpi>
+
+cd hemiola/hid
+sudo python3 testHID.py
+```
+3. on the machine connected to the rpi you should see
+```
+Hemiola
+works
+```
+in the editor that you left open.
