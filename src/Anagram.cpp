@@ -3,8 +3,14 @@
 #include <algorithm>
 #include <iostream>
 #include <locale>
+#include <utility>
+
+#include <nuspell/dictionary.hxx>
+#include <nuspell/finder.hxx>
 
 using namespace hemiola;
+
+using ListOfDicts = std::vector<std::pair<std::string, std::string>>;
 
 namespace
 {
@@ -19,7 +25,8 @@ namespace
 
         if ( word.size() == 0 ) return word;
 
-        // sort will not compare things that only have one letter, but it still needs to be lowercase
+        // sort will not compare things that only have one letter, but it still needs to be
+        // lowercase
         if ( word.size() == 1 ) return std::string { std::tolower ( word [0], loc ) };
 
         const auto comparatorMod = [&loc] ( auto& a, auto& b ) {
@@ -34,6 +41,14 @@ namespace
         std::sort ( sorted.begin(), sorted.end(), comparatorMod );
 
         return sorted;
+    }
+
+    [[maybe_unused]] ListOfDicts::const_iterator findDictionary ( const std::string& dict )
+    {
+        ListOfDicts dictList;
+        nuspell::search_default_dirs_for_dicts ( dictList );
+        auto dictIter = nuspell::find_dictionary ( dictList, dict );
+        return dictIter;
     }
 }
 

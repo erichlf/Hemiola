@@ -6,9 +6,30 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/erichlf/Hemiola")
 
 option(BUILD_SHARED_LIBS "Build as shared library" ON)
 
+include(ExternalProject)
+find_package(Git REQUIRED)
+
+set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
+
+ExternalProject_Add(nuspell
+    PREFIX ${EXTERNAL_INSTALL_LOCATION}
+    GIT_REPOSITORY https://github.com/nuspell/nuspell
+    GIT_TAG "v5.0.1"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
+    )
+
+include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
+link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
+
 add_library(hemiola
     SHARED
     src/Anagram.cpp)
+
+add_dependencies(hemiola nuspell)
+
+add_library(Nuspell::nuspell SHARED IMPORTED)
+
+target_link_libraries(hemiola ${EXTERNAL_INSTALL_LOCATION}/lib/libnuspell.so)
 
 target_include_directories(hemiola
     PUBLIC
@@ -19,6 +40,9 @@ target_include_directories(hemiola
 set_target_properties(hemiola
     PROPERTIES
     CXX_STANDARD 17
+    )
+target_compile_options(hemiola PRIVATE
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
     )
 
 find_package(GTest 1.8)
