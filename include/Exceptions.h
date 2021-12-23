@@ -25,7 +25,9 @@ namespace hemiola
     };
 
     /*!
-     * @brief An exception that has an event code associated with it.
+     * @brief An exception that has an event code associated with it, such as errno.
+     * @note This is intended to be the base class for other coded exceptions that likely will use
+     *       an enum for those error codes.
      */
     class CodedException : public std::exception
     {
@@ -57,7 +59,7 @@ namespace hemiola
     public:
         ExecutionException ( const std::string& msg, const int code )
             : CodedException ( msg, code )
-            {}
+        {}
     };
 
     /*!
@@ -68,6 +70,6 @@ namespace hemiola
     public:
         IoException ( const std::string& msg, const int code )
             : CodedException ( msg, code )
-            {}
+        {}
     };
 }  // namespace hemiola

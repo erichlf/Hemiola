@@ -51,10 +51,10 @@ namespace hemiola
         FILE* pipe = popen ( cmd.c_str(), "r" );
         if ( !pipe )
             throw ExecutionException ( "popen error", errno );
-        char buffer [128];
+        char buffer [4096];  // POSIX compliance suggests lines shouldn't be longer than this
         std::string result = "";
         while ( !feof ( pipe ) ) {
-            if ( fgets ( buffer, 128, pipe ) != NULL )
+            if ( fgets ( buffer, sizeof ( buffer ), pipe ) != NULL )
                 result += buffer;
         }
         pclose ( pipe );

@@ -64,6 +64,10 @@ namespace hemiola
          * @brief handle the current event
          * @param onEvent callback for when new event has been processed
          * @post events are sent to the callback
+         * @note in the case of character keys a wchar_t is sent to the callback, however in
+         *       the case of a modifier, e.g. shift, nothing is given to the callback as those
+         *       keys act on the next character. For all other function keys the scan code is
+         *       send to the callback.
          */
         void captureEvent ( std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent );
 
