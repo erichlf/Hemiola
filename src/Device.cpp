@@ -29,9 +29,7 @@ hemiola::Device::~Device()
 
 void hemiola::Device::open()
 {
-    if ( m_Opened ) {
-        return;
-    }
+    assert ( !m_Opened );
 
     m_DeviceString = getInputDevice();
 
