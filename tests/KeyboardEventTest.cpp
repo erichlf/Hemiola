@@ -21,7 +21,7 @@ TEST ( KeyboardEventTest, KeyPressTest )
 
     // invalid scanCode
     data.emplace_back ( input_event { .type = EV_KEY, .code = 129, .value = EV_MAKE } );
-    expectedData.emplace_back ( ( unsigned short )129 );
+    expectedData.emplace_back ( static_cast<unsigned short> ( 129  ) );
 
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_5, .value = EV_MAKE } );
     expectedData.emplace_back ( wchar_t ( '5' ) );
@@ -35,12 +35,12 @@ TEST ( KeyboardEventTest, KeyPressTest )
     // ctrl + c
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE } );
-    expectedData.emplace_back ( (unsigned short)KEY_RIGHTCTRL );
+    expectedData.emplace_back ( static_cast<unsigned short> ( KEY_RIGHTCTRL  ) );
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE } );
     expectedData.emplace_back ( wchar_t ( 'c' ) );
 
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE } );
-    expectedData.emplace_back ( (unsigned short)KEY_F12 );
+    expectedData.emplace_back ( static_cast<unsigned short> ( KEY_F12  ) );
 
     // shift + z
     data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
