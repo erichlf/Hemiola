@@ -25,12 +25,13 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, st
 {}
 
 void hemiola::KeyboardEvents::capture (
+    std::function<void ( wchar_t )> passThrough,
     std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
     std::function<void ( std::exception_ptr )> onError )
 {
     try {
-        m_InputHID->open();
-        while ( updateKeyState() ) {
+        while ( updateKeyState( passThrough ) ) {
+            // process the scan code
             captureEvent ( onEvent );
         }
     } catch ( ... ) {
@@ -75,7 +76,7 @@ void hemiola::KeyboardEvents::captureEvent (
     }
 }
 
-bool hemiola::KeyboardEvents::updateKeyState()
+bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( wchar_t )> passThrough )
 {
     try {
         m_InputHID->read ( m_KeyState.event );
@@ -85,12 +86,15 @@ bool hemiola::KeyboardEvents::updateKeyState()
     }
 
     if ( m_KeyState.event.type != EV_KEY ) {
-        return updateKeyState();  // keyboard events are always of type EV_KEY
+        return updateKeyState ( passThrough );  // keyboard events are always of type EV_KEY
     }
 
     unsigned short scanCode
         = m_KeyState.event.code;  // the key code of the pressed key (some codes are from "scan code
                                   // set 1", some are different (see <linux/input.h>)
+
+    // send the scan code directly to the output
+    passThrough ( scanCode );
 
     m_KeyState.repeatEnd = false;
     if ( m_KeyState.event.value == EV_REPEAT ) {
@@ -109,7 +113,7 @@ bool hemiola::KeyboardEvents::updateKeyState()
         if ( m_KeyState.repeatEnd ) {
             return true;
         } else {
-            return updateKeyState();
+            return updateKeyState ( passThrough );
         }
     }
     m_KeyState.repeats = 0;
@@ -122,7 +126,7 @@ bool hemiola::KeyboardEvents::updateKeyState()
     m_KeyState.key = 0;
 
     if ( m_KeyState.event.value != EV_MAKE )
-        return updateKeyState();
+        return updateKeyState ( passThrough );
 
     wchar_t wch {};
     switch ( scanCode ) {

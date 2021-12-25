@@ -16,4 +16,4 @@ target_compile_options(fakes PRIVATE
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
     )
 
-target_link_libraries(fakes hemiola)
+target_link_libraries(fakes hemiolalib)

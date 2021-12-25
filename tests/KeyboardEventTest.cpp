@@ -15,14 +15,17 @@
 TEST ( KeyboardEventTest, KeyPressTest )
 {
     auto device = std::make_shared<hemiola::FakeInputHID>();
+    device->open();
 
     std::vector<input_event> data;
+    std::vector<unsigned short> expectedPassData;
     std::vector<std::variant<wchar_t, unsigned short>> expectedData;
     std::variant<wchar_t, unsigned short> empty;
     auto addData
-        = [&data, &expectedData, &empty] ( const input_event& event,
+        = [&data, &expectedData, &expectedPassData, &empty] ( const input_event& event,
                                            const std::variant<wchar_t, unsigned short>& letter ) {
               data.push_back ( event );
+              expectedPassData.push_back ( event.code );
               if ( letter != empty ) {
                   expectedData.push_back ( letter );
               }
@@ -59,10 +62,16 @@ TEST ( KeyboardEventTest, KeyPressTest )
     device->setData ( data );
     // receivedData will be the reverse of this data, because I didn't use a queue
     std::reverse ( expectedData.begin(), expectedData.end() );
+    std::reverse ( expectedPassData.begin(), expectedPassData.end() );
 
     auto keyTable = std::make_shared<hemiola::KeyTable>();
 
     hemiola::KeyboardEvents keys ( keyTable, device );
+    // all data should be passed to output initially
+    std::vector<unsigned short> passData;
+    auto passThrough = [&passData] ( unsigned short code ) {
+        passData.push_back ( code );
+    };
 
     // data that will be captured by keys
     std::vector<std::variant<wchar_t, unsigned short>> receivedData;
@@ -75,7 +84,7 @@ TEST ( KeyboardEventTest, KeyPressTest )
     auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
 
     // normally this would be run in its own thread
-    keys.capture ( onEvent, onError );
+    keys.capture ( passThrough, onEvent, onError );
 
     if ( e != nullptr ) {
         try {
@@ -88,6 +97,12 @@ TEST ( KeyboardEventTest, KeyPressTest )
         }
     } else {
         FAIL() << "Expected an Exception but didn't get one.";
+    }
+
+    EXPECT_EQ ( passData.size(), expectedPassData.size() );
+
+    for ( int i = 0; i < expectedPassData.size(); ++i ) {
+        EXPECT_EQ ( passData.at ( i ), expectedPassData.at ( i ) );
     }
 
     EXPECT_EQ ( receivedData.size(), expectedData.size() );
