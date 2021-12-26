@@ -18,41 +18,43 @@ TEST ( KeyboardEventTest, KeyPressTest )
 
     std::vector<input_event> data;
     std::vector<std::variant<wchar_t, unsigned short>> expectedData;
+    std::variant<wchar_t, unsigned short> empty;
+    auto addData
+        = [&data, &expectedData, &empty] ( const input_event& event,
+                                           const std::variant<wchar_t, unsigned short>& letter ) {
+              data.push_back ( event );
+              if ( letter != empty ) {
+                  expectedData.push_back ( letter );
+              }
+          };
 
     // invalid scanCode
-    data.emplace_back ( input_event { .type = EV_KEY, .code = 129, .value = EV_MAKE } );
-    expectedData.emplace_back ( static_cast<unsigned short> ( 129  ) );
-
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_5, .value = EV_MAKE } );
-    expectedData.emplace_back ( wchar_t ( '5' ) );
-
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_M, .value = EV_MAKE } );
-    expectedData.emplace_back ( wchar_t ( 'm' ) );
-
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE } );
-    expectedData.emplace_back ( wchar_t ( '\\' ) );
+    addData ( input_event { .type = EV_KEY, .code = 129, .value = EV_MAKE },
+              static_cast<unsigned short> ( 129 ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_5, .value = EV_MAKE }, wchar_t ( '5' ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_M, .value = EV_MAKE }, wchar_t ( 'm' ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE },
+              wchar_t ( '\\' ) );
 
     // ctrl + c
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE } );
-    expectedData.emplace_back ( static_cast<unsigned short> ( KEY_RIGHTCTRL  ) );
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE } );
-    expectedData.emplace_back ( wchar_t ( 'c' ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK }, empty );
+    addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE },
+              static_cast<unsigned short> ( KEY_RIGHTCTRL ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE }, wchar_t ( 'c' ) );
 
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE } );
-    expectedData.emplace_back ( static_cast<unsigned short> ( KEY_F12  ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE },
+              static_cast<unsigned short> ( KEY_F12 ) );
 
     // shift + z
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE } );
-    expectedData.emplace_back ( wchar_t ( 'Z' ) );
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE } );
+    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK }, empty );
+    addData ( input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE }, wchar_t ( 'Z' ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE }, empty );
 
     // shift was pressed but then released, so we shouldn't see a shift key in this case
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK } );
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE } );
-    data.emplace_back ( input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE } );
-    expectedData.emplace_back ( wchar_t ( '=' ) );
+    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK }, empty );
+    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE }, empty );
+    addData ( input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE },
+              wchar_t ( '=' ) );
 
     device->setData ( data );
     // receivedData will be the reverse of this data, because I didn't use a queue
