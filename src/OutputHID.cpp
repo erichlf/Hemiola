@@ -20,15 +20,13 @@ void hemiola::OutputHID::open()
     HID::open ( O_WRONLY | O_SYNC );
 }
 
-void hemiola::OutputHID::write ( unsigned short code )
+void hemiola::OutputHID::write ( const std::wstring& ws )
 {
     assert ( m_Opened );
+    assert ( !ws.empty() );
 
-    std::stringstream s;
-    s << code;
-
-    if ( ::write ( m_HIDId, s.str().c_str(), sizeof ( unsigned short ) )
+    if ( ::write ( m_HIDId, ws.c_str(), sizeof ( wchar_t ) * ws.size() )
          <= 0 ) {
-        throw IoException ( "Unable to write to output device.", errno );
+        throw IoException ( "Unable to write to output device", errno );
     }
 }
