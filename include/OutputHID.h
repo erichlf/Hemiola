@@ -29,10 +29,10 @@ namespace hemiola
 
         /*!
          * @brief write scan code to hid
-         * @param code the scan code to write to the HID
+         * @param ws the keypress to send to HID output
          * @throw IoException if we are unable to write to device
          * @assumption device has been opened for writing
          */
-        void write ( unsigned short code );
+        void write ( const std::wstring& ws );
     };
 }

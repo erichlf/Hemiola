@@ -120,6 +120,6 @@ void hemiola::InputHID::read ( input_event& event )
     assert ( m_Opened );
 
     if ( ::read ( m_HIDId, &event, sizeof ( struct input_event ) ) <= 0 ) {
-        throw IoException ( "Unable to read from input device.", errno );
+        throw IoException ( "Unable to read from input device", errno );
     }
 }
