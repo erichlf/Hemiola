@@ -15,6 +15,8 @@ def write_report(report):
 
 # Press H
 write_report(chr(32) + NULL_CHAR + chr(11) + NULL_CHAR*5)
+# release keys otherwise the above won't be capitalized
+write_report(NULL_CHAR*8)
 # Press e
 write_report(NULL_CHAR*2 + chr(8) + NULL_CHAR*5)
 # Press m key
