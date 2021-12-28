@@ -19,7 +19,7 @@ namespace
      * @param string to sort and change to lowercase
      * @return the string sorted and changed to lowercase
      */
-    std::string sortToLower(const std::string& word )
+    std::string sortToLower ( const std::string& word )
     {
         std::locale loc;
 
