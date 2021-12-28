@@ -2,7 +2,9 @@
 
 #include "HID.h"
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace hemiola
 {
@@ -29,10 +31,10 @@ namespace hemiola
 
         /*!
          * @brief write scan code to hid
-         * @param ws the keypress to send to HID output
+         * @param data byte data for the keypress to send to HID output
          * @throw IoException if we are unable to write to device
          * @assumption device has been opened for writing
          */
-        void write ( const std::wstring& ws );
+        void write ( const std::vector<uint8_t>& data );
     };
 }
