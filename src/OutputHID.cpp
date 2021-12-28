@@ -4,7 +4,6 @@
 
 #include <cassert>
 #include <fcntl.h>
-#include <sstream>
 #include <unistd.h>
 
 #include <linux/input.h>
@@ -20,12 +19,12 @@ void hemiola::OutputHID::open()
     HID::open ( O_WRONLY | O_SYNC );
 }
 
-void hemiola::OutputHID::write ( const std::wstring& ws )
+void hemiola::OutputHID::write ( const std::vector<uint8_t>& data )
 {
     assert ( m_Opened );
-    assert ( !ws.empty() );
+    assert ( !data.empty() );
 
-    if ( ::write ( m_HIDId, ws.c_str(), sizeof ( wchar_t ) * ws.size() )
+    if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() )
          <= 0 ) {
         throw IoException ( "Unable to write to output device", errno );
     }
