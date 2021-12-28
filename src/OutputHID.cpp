@@ -5,6 +5,7 @@
 #include <cassert>
 #include <fcntl.h>
 #include <unistd.h>
+#include <vector>
 
 #include <linux/input.h>
 
