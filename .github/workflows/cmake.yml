@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - name: Install gtest
-      run: sudo apt install -y libgtest-dev && cd /usr/src/gtest && sudo mkdir build && sudo cmake -B build . && sudo cmake --build build/ && sudo cp build/*.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+      run: sudo apt install -y libgtest-dev && cd /usr/src/gtest && sudo mkdir build && sudo cmake -B build . && sudo cmake --build build/ && sudo cp build/lib/*.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
    
     - uses: actions/checkout@v2
 
