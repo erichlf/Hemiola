@@ -25,14 +25,14 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, st
 {}
 
 void hemiola::KeyboardEvents::capture (
-    std::function<void ( const unsigned short )> passThrough,
+    std::function<void ( KeyState )> passThrough,
     std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
     std::function<void ( std::exception_ptr )> onError )
 {
     try {
-        while ( updateKeyState( passThrough ) ) {
-            // process the scan code
-            captureEvent ( onEvent );
+        while ( updateKeyState() ) {
+            passThrough ( m_KeyState );  // send the scan code directly to the output
+            captureEvent ( onEvent );  // process the scan code
         }
     } catch ( ... ) {
         std::cerr << "Input device closed unexpectedly.\n";
@@ -76,7 +76,7 @@ void hemiola::KeyboardEvents::captureEvent (
     }
 }
 
-bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( const unsigned short )> passThrough )
+bool hemiola::KeyboardEvents::updateKeyState()
 {
     try {
         m_InputHID->read ( m_KeyState.event );
@@ -86,15 +86,12 @@ bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( const unsign
     }
 
     if ( m_KeyState.event.type != EV_KEY ) {
-        return updateKeyState ( passThrough );  // keyboard events are always of type EV_KEY
+        return updateKeyState();  // keyboard events are always of type EV_KEY
     }
 
     unsigned short scanCode
         = m_KeyState.event.code;  // the key code of the pressed key (some codes are from "scan code
                                   // set 1", some are different (see <linux/input.h>)
-
-    // send the scan code directly to the output
-    passThrough ( scanCode );
 
     m_KeyState.repeatEnd = false;
     if ( m_KeyState.event.value == EV_REPEAT ) {
@@ -113,7 +110,7 @@ bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( const unsign
         if ( m_KeyState.repeatEnd ) {
             return true;
         } else {
-            return updateKeyState ( passThrough );
+            return updateKeyState();
         }
     }
     m_KeyState.repeats = 0;
@@ -126,7 +123,7 @@ bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( const unsign
     m_KeyState.key = 0;
 
     if ( m_KeyState.event.value != EV_MAKE )
-        return updateKeyState ( passThrough );
+        return updateKeyState();
 
     wchar_t wch {};
     switch ( scanCode ) {

@@ -46,21 +46,20 @@ namespace hemiola
 
         /*!
          * @brief begin capturing keys
-         * @param passThrough function which will send raw scan codes to output device
+         * @param passThrough function which will send data straight to output device
          * @param onEvent function which will handle any key capture events
          * @param onError function which will handle any errors that arise
          */
-        void capture ( std::function<void ( const unsigned short )> passThrough,
+        void capture ( std::function<void ( KeyState )> passThrough,
                        std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
                        std::function<void ( std::exception_ptr )> onError );
 
     private:
         /*
          * @brief function that translates key press into KeyState
-         * @param passThrough function which will send raw scan codes to output device
          * @return true if key event was processed false if connection seems to be lost
          */
-        bool updateKeyState ( std::function<void ( const unsigned short )> passThrough );
+        bool updateKeyState();
 
         /*!
          * @brief handle the current event

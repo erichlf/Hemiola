@@ -26,33 +26,7 @@ int main()
     input->open();
     output->open();
 
-    try {
-        // H
-        output->write ( std::vector<uint8_t> { 0x20, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        // e
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        // m
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        // i
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        // o
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        // l
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        // a
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-        output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
-    } catch ( const IoException& e ) {
-        std::cerr << e.what() << " errno " << e.code() << "\n";
-    }
-
-    hemiola::KeyboardEvents eventHandler ( keys, input );
+    KeyboardEvents eventHandler ( keys, input );
 
     // for now we aren't going to do anything with the data
     auto onEvent = [] ( std::variant<wchar_t, unsigned short> ) {};
@@ -61,10 +35,28 @@ int main()
     std::exception_ptr e;
     auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
 
-    auto passThrough = [&keys, &output, &onError] ( const unsigned short code ) {
+    auto passThrough = [&keys, &output, &onError] ( KeyState keyState ) {
+        unsigned short firstByte = 0x00;
+        if ( keyState.ctrl ) {
+            firstByte = KEY_RIGHTCTRL;
+        } else if ( keyState.shift && !keyState.capslock ) {
+            firstByte = KEY_RIGHTSHIFT;
+        } else if ( !keyState.shift && keyState.capslock ) {
+            firstByte = KEY_RIGHTSHIFT;
+        } else if ( keyState.altgr ) {
+            firstByte = KEY_RIGHTALT;
+        }
         try {
-            output->write ( std::vector<uint8_t> { 0x00, 0x00, keys->scanToHex ( code ) , 0x00, 0x00, 0x00, 0x00, 0x00 } );
-            output->write ( std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
+            output->write ( std::vector<uint8_t> { keys->scanToHex ( firstByte ),
+                                                   0x00,
+                                                   keys->scanToHex ( keyState.event.code ),
+                                                   0x00,
+                                                   0x00,
+                                                   0x00,
+                                                   0x00,
+                                                   0x00 } );
+            output->write (
+                std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
         } catch ( ... ) {
             onError ( std::current_exception() );
         }

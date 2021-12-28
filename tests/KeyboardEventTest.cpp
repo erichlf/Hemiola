@@ -69,8 +69,8 @@ TEST ( KeyboardEventTest, KeyPressTest )
     hemiola::KeyboardEvents keys ( keyTable, device );
     // all data should be passed to output initially
     std::vector<unsigned short> passData;
-    auto passThrough = [&passData] ( const unsigned short code ) {
-        passData.push_back ( code );
+    auto passThrough = [&passData] ( hemiola::KeyState keyState ) {
+        passData.push_back ( keyState.event.code );
     };
 
     // data that will be captured by keys
