@@ -73,7 +73,17 @@ namespace hemiola
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t scanToHex ( unsigned int code ) const { return m_HexValues.at ( code ); }
+        uint8_t scanToHex ( unsigned int code ) const;
+
+        /*!
+         * @brief determine if the scan code is a modifier key
+         * @para code to check
+         * @return true if the scan code is a modifier key
+         */
+        bool isModifier ( unsigned int code ) const
+        {
+            return ( m_ModiferHex.count ( code ) != 0 );
+        }
 
     private:
         /*!
@@ -175,7 +185,7 @@ namespace hemiola
 
             // { KEY_NONE, 0x00 },     // No key pressed
             // { KEY_ERR_OVF, 0x01 },  //  Keyboard Error Roll Over - used for all slots if too many
-                                    //  keys are pressed ("Phantom key")
+            //  keys are pressed ("Phantom key")
             // 0x02 //  Keyboard POST Fail
             // 0x03 //  Keyboard Error Undefined
             { KEY_A, 0x04 },  // Keyboard a and A
@@ -233,7 +243,7 @@ namespace hemiola
             { KEY_COMMA, 0x36 },       // Keyboard , and <
             { KEY_DOT, 0x37 },         // Keyboard . and >
             { KEY_SLASH, 0x38 },       // Keyboard / and ?
-            { KEY_CAPSLOCK, 0x39 },    // Keyboard Caps Lock
+            { KEY_CAPSLOCK, 0x02 },    // Keyboard Caps Lock, this is actually shift
 
             { KEY_F1, 0x3a },   // Keyboard F1
             { KEY_F2, 0x3b },   // Keyboard F2
@@ -395,15 +405,6 @@ namespace hemiola
             // 0xdc  Keypad Decimal
             // 0xdd  Keypad Hexadecimal
 
-            { KEY_LEFTCTRL, 0xe0 },    // Keyboard Left Control
-            { KEY_LEFTSHIFT, 0xe1 },   // Keyboard Left Shift
-            { KEY_LEFTALT, 0xe2 },     // Keyboard Left Alt
-            { KEY_LEFTMETA, 0xe3 },    // Keyboard Left GUI
-            { KEY_RIGHTCTRL, 0xe4 },   // Keyboard Right Control
-            { KEY_RIGHTSHIFT, 0xe5 },  // Keyboard Right Shift
-            { KEY_RIGHTALT, 0xe6 },    // Keyboard Right Alt
-            { KEY_RIGHTMETA, 0xe7 },   // Keyboard Right GUI
-
             // { KEY_MEDIA_PLAYPAUSE, 0xe8 },
             // { KEY_MEDIA_STOPCD, 0xe9 },
             // { KEY_MEDIA_PREVIOUSSONG, 0xea },
@@ -424,6 +425,17 @@ namespace hemiola
             // { KEY_MEDIA_COFFEE, 0xf9 },
             // { KEY_MEDIA_REFRESH, 0xfa },
             // { KEY_MEDIA_CALC, 0xfb }
+        };
+
+        const std::unordered_map<int, uint8_t> m_ModiferHex = {
+            { KEY_LEFTCTRL, 0x01 },    // Keyboard Left Control
+            { KEY_LEFTSHIFT, 0x02 },   // Keyboard Left Shift
+            { KEY_LEFTALT, 0x04 },     // Keyboard Left Alt
+            { KEY_LEFTMETA, 0x08 },    // Keyboard Left GUI
+            { KEY_RIGHTCTRL, 0x10 },   // Keyboard Right Control
+            { KEY_RIGHTSHIFT, 0x20 },  // Keyboard Right Shift
+            { KEY_RIGHTALT, 0x40 },    // Keyboard Right Alt
+            { KEY_RIGHTMETA, 0x80 }    // Keyboard Right GUI
         };
 
         const std::string m_CharOrFunc

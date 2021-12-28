@@ -36,25 +36,37 @@ int main()
     auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
 
     auto passThrough = [&keys, &output, &onError] ( KeyState keyState ) {
-        unsigned short firstByte = 0x00;
+        uint8_t modifier = 0x00;
         if ( keyState.ctrl ) {
-            firstByte = KEY_RIGHTCTRL;
-        } else if ( keyState.shift && !keyState.capslock ) {
-            firstByte = KEY_RIGHTSHIFT;
+            modifier |= keys->scanToHex ( KEY_RIGHTCTRL );
+        }
+        if ( keyState.shift && !keyState.capslock ) {
+            modifier |= keys->scanToHex ( KEY_RIGHTSHIFT );
         } else if ( !keyState.shift && keyState.capslock ) {
-            firstByte = KEY_RIGHTSHIFT;
-        } else if ( keyState.altgr ) {
-            firstByte = KEY_RIGHTALT;
+            if ( keyState.event.code != KEY_ENTER ) {
+                modifier |= keys->scanToHex ( KEY_CAPSLOCK );
+            }
+        }
+        if ( keyState.alt ) {
+            modifier |= keys->scanToHex ( KEY_LEFTALT );
+        }
+        if ( keyState.altgr ) {
+            modifier |= keys->scanToHex ( KEY_RIGHTALT );
+        }
+        if ( keyState.meta ) {
+            modifier |= keys->scanToHex ( KEY_LEFTMETA );
         }
         try {
-            output->write ( std::vector<uint8_t> { keys->scanToHex ( firstByte ),
-                                                   0x00,
-                                                   keys->scanToHex ( keyState.event.code ),
-                                                   0x00,
-                                                   0x00,
-                                                   0x00,
-                                                   0x00,
-                                                   0x00 } );
+            unsigned short scan = ( keyState.key == wchar_t{} ) ? 0 : keyState.event.code;
+            output->write ( std::vector<uint8_t> {
+                modifier,  // keys->scanToHex ( modifier ),
+                0x00,
+                keys->scanToHex ( scan ),
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00 } );
             output->write (
                 std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
         } catch ( ... ) {

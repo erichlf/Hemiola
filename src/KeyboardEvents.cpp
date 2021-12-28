@@ -53,21 +53,12 @@ void hemiola::KeyboardEvents::captureEvent (
         return;
     }
 
-    // on key press
-    if ( scanCode == KEY_ENTER || scanCode == KEY_KPENTER
-         || ( m_KeyState.ctrl && ( scanCode == KEY_C || scanCode == KEY_D ) ) ) {
-        // on ENTER key or Ctrl+C/Ctrl+D event
-        onEvent ( scanCode );
-
-        return;
-    }
-
     if ( m_KeyTable->isCharKey ( scanCode ) ) {
         onEvent ( m_KeyState.key );
     } else if ( m_KeyTable->isFuncKey ( scanCode ) || scanCode == KEY_SPACE
                 || scanCode == KEY_TAB ) {
         // we don't want to send altgr or shift keys since m_KeyState.key will have that
-        if ( scanCode != KEY_LEFTSHIFT && scanCode != KEY_RIGHTSHIFT && scanCode != KEY_RIGHTALT ) {
+        if ( !m_KeyTable->isModifier ( scanCode ) ) {
             onEvent ( scanCode );
         }
     } else {
@@ -104,6 +95,13 @@ bool hemiola::KeyboardEvents::updateKeyState()
             m_KeyState.altgr = false;
         } else if ( scanCode == KEY_LEFTCTRL || scanCode == KEY_RIGHTCTRL ) {
             m_KeyState.ctrl = false;
+        } else if ( scanCode == KEY_LEFTALT || scanCode == KEY_RIGHTALT ) {
+            m_KeyState.alt = false;
+        } else if ( scanCode == KEY_LEFTMETA || scanCode == KEY_RIGHTMETA ) {
+            // press and release of meta needs to be handled differently
+            m_KeyState.meta = false;
+            m_KeyState.key = m_KeyTable->handleScanCode ( scanCode, m_KeyState );
+            return true;
         }
 
         m_KeyState.repeatEnd = m_KeyState.repeats > 0;
@@ -122,8 +120,9 @@ bool hemiola::KeyboardEvents::updateKeyState()
 
     m_KeyState.key = 0;
 
-    if ( m_KeyState.event.value != EV_MAKE )
+    if ( m_KeyState.event.value != EV_MAKE ) {
         return updateKeyState();
+    }
 
     wchar_t wch {};
     switch ( scanCode ) {
@@ -140,6 +139,13 @@ bool hemiola::KeyboardEvents::updateKeyState()
         case KEY_LEFTCTRL:
         case KEY_RIGHTCTRL:
             m_KeyState.ctrl = true;
+            break;
+        case KEY_LEFTALT:  // KEY_LEFTALT == KEY_RIGHTALT
+            m_KeyState.alt = true;
+            break;
+        case KEY_LEFTMETA:
+        case KEY_RIGHTMETA:
+            m_KeyState.meta = true;
             break;
         default:
             wch = m_KeyTable->handleScanCode ( scanCode, m_KeyState );

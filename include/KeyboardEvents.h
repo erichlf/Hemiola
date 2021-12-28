@@ -26,8 +26,10 @@ namespace hemiola
         bool scanCodeOk;
         bool capslock = false;
         bool shift = false;
+        bool alt = false;
         bool altgr = false;
-        bool ctrl = false;  // used for identifying Ctrl+C / Ctrl+D
+        bool ctrl = false;
+        bool meta = false;
     };
 
     /*!
