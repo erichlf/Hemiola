@@ -2,15 +2,15 @@
 
 #include "KeyboardEvents.h"
 
+#include "Exceptions.h"
+#include "KeyTable.h"
+#include "Utils.h"
+
 #include <cwctype>
 #include <iostream>
 #include <string>
 
 #include <linux/input.h>
-
-#include "Exceptions.h"
-#include "KeyTable.h"
-#include "Utils.h"
 
 using namespace hemiola;
 
@@ -25,7 +25,7 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, st
 {}
 
 void hemiola::KeyboardEvents::capture (
-    std::function<void ( wchar_t )> passThrough,
+    std::function<void ( const unsigned short )> passThrough,
     std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
     std::function<void ( std::exception_ptr )> onError )
 {
@@ -76,7 +76,7 @@ void hemiola::KeyboardEvents::captureEvent (
     }
 }
 
-bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( wchar_t )> passThrough )
+bool hemiola::KeyboardEvents::updateKeyState ( std::function<void ( const unsigned short )> passThrough )
 {
     try {
         m_InputHID->read ( m_KeyState.event );
