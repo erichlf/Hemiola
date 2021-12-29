@@ -3,6 +3,7 @@
 #include <exception>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <variant>
 
 #include <linux/input.h>
@@ -17,7 +18,7 @@ namespace hemiola
      */
     struct KeyState
     {
-        wchar_t key;
+        std::optional<wchar_t> key;
         unsigned int repeats;  // count_repeats differs from the actual number of repeated
         // characters! afaik, only the OS knows how these two values are
         // related (by respecting configured repeat speed and delay)

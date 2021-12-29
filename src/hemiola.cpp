@@ -38,30 +38,29 @@ int main()
     auto passThrough = [&keys, &output, &onError] ( KeyState keyState ) {
         uint8_t modifier = 0x00;
         if ( keyState.ctrl ) {
-            modifier |= keys->scanToHex ( KEY_RIGHTCTRL );
+            modifier |= keys->modToHex ( KEY_RIGHTCTRL );
         }
         if ( keyState.shift && !keyState.capslock ) {
-            modifier |= keys->scanToHex ( KEY_RIGHTSHIFT );
+            modifier |= keys->modToHex ( KEY_RIGHTSHIFT );
         } else if ( !keyState.shift && keyState.capslock ) {
             if ( keyState.event.code != KEY_ENTER ) {
-                modifier |= keys->scanToHex ( KEY_CAPSLOCK );
+                modifier |= keys->modToHex ( KEY_CAPSLOCK );
             }
         }
         if ( keyState.alt ) {
-            modifier |= keys->scanToHex ( KEY_LEFTALT );
+            modifier |= keys->modToHex ( KEY_LEFTALT );
         }
         if ( keyState.altgr ) {
-            modifier |= keys->scanToHex ( KEY_RIGHTALT );
+            modifier |= keys->modToHex ( KEY_RIGHTALT );
         }
         if ( keyState.meta ) {
-            modifier |= keys->scanToHex ( KEY_LEFTMETA );
+            modifier |= keys->modToHex ( KEY_LEFTMETA );
         }
         try {
-            unsigned short scan = ( keyState.key == wchar_t{} ) ? 0 : keyState.event.code;
             output->write ( std::vector<uint8_t> {
-                modifier,  // keys->scanToHex ( modifier ),
+                modifier,
                 0x00,
-                keys->scanToHex ( scan ),
+                keys->scanToHex ( keyState.event.code ),
                 0x00,
                 0x00,
                 0x00,

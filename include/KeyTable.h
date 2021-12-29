@@ -3,6 +3,7 @@
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
 #include <cstring>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -54,9 +55,9 @@ namespace hemiola
          * @brief convert a scan code to a character
          * @param code the scan code from key press
          * @param keyState the current state of the keypress
-         * @return character representation of key press
+         * @return character representation of key press or nullopt if no representation found
          */
-        wchar_t handleScanCode ( unsigned int code, const KeyState& keyState ) const;
+        std::optional<wchar_t> handleScanCode ( unsigned int code, const KeyState& keyState ) const;
 
         /*
          * @brief check if the scan code is a valid scan code
@@ -73,7 +74,17 @@ namespace hemiola
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t scanToHex ( unsigned int code ) const;
+        uint8_t scanToHex ( unsigned int code ) const { return m_HexValues.at ( code ); };
+
+        /*!
+         * @brief convert a scan code (keyboard position) to the corresponding modifier hex value
+         * @param code the keyboard position to convert to modifier hex
+         * @return the modifier hex value corresponding to the scan code
+         * @throw std::exception if the code does not have a hex representation
+         * @note see the follow pdf for further details
+         *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
+         */
+        uint8_t modToHex ( unsigned int code ) const {return m_ModiferHex.at ( code ); };
 
         /*!
          * @brief determine if the scan code is a modifier key
@@ -425,6 +436,9 @@ namespace hemiola
             // { KEY_MEDIA_COFFEE, 0xf9 },
             // { KEY_MEDIA_REFRESH, 0xfa },
             // { KEY_MEDIA_CALC, 0xfb }
+
+            { KEY_LEFTMETA, 0xE3 },    // Keyboard Right GUI
+            { KEY_RIGHTMETA, 0xE7 },    // Keyboard Right GUI
         };
 
         const std::unordered_map<int, uint8_t> m_ModiferHex = {
@@ -435,7 +449,7 @@ namespace hemiola
             { KEY_RIGHTCTRL, 0x10 },   // Keyboard Right Control
             { KEY_RIGHTSHIFT, 0x20 },  // Keyboard Right Shift
             { KEY_RIGHTALT, 0x40 },    // Keyboard Right Alt
-            { KEY_RIGHTMETA, 0x80 }    // Keyboard Right GUI
+            { KEY_RIGHTMETA, 0x80 },    // Keyboard Right GUI
         };
 
         const std::string m_CharOrFunc

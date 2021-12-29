@@ -165,9 +165,9 @@ inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
     return index;
 }
 
-wchar_t hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& keyState ) const
+std::optional<wchar_t> hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& keyState ) const
 {
-    wchar_t wch;
+    std::optional<wchar_t> wch;
     if ( isCharKey ( code ) ) {
         if ( keyState.altgr ) {
             wch = altgrKeys ( code );
@@ -200,13 +200,4 @@ wchar_t hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& k
     }
 
     return wch;
-}
-
-uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
-{
-    if ( isModifier ( code ) ) {
-        return m_ModiferHex.at ( code );
-    }
-
-    return m_HexValues.at ( code );
 }

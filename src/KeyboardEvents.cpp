@@ -6,6 +6,7 @@
 #include "KeyTable.h"
 #include "Utils.h"
 
+#include <cassert>
 #include <cwctype>
 #include <iostream>
 #include <string>
@@ -54,7 +55,8 @@ void hemiola::KeyboardEvents::captureEvent (
     }
 
     if ( m_KeyTable->isCharKey ( scanCode ) ) {
-        onEvent ( m_KeyState.key );
+        assert ( m_KeyState.key != std::nullopt );  // this shouldn't happen if scanCode is a character
+        onEvent ( m_KeyState.key.value() );
     } else if ( m_KeyTable->isFuncKey ( scanCode ) || scanCode == KEY_SPACE
                 || scanCode == KEY_TAB ) {
         // we don't want to send altgr or shift keys since m_KeyState.key will have that
@@ -124,7 +126,7 @@ bool hemiola::KeyboardEvents::updateKeyState()
         return updateKeyState();
     }
 
-    wchar_t wch {};
+    std::optional<wchar_t> wch;
     switch ( scanCode ) {
         case KEY_CAPSLOCK:
             m_KeyState.capslock = !m_KeyState.capslock;
