@@ -1,8 +1,8 @@
 #include "Anagram.h"
 
 #include <algorithm>
+#include <cwctype>
 #include <iostream>
-#include <locale>
 #include <utility>
 
 #include <nuspell/dictionary.hxx>
@@ -19,19 +19,19 @@ namespace
      * @param string to sort and change to lowercase
      * @return the string sorted and changed to lowercase
      */
-    std::string sortToLower ( const std::string& word )
+    std::wstring sortTowlower ( const std::wstring& word )
     {
-        std::locale loc;
-
         if ( word.size() == 0 ) return word;
 
         // sort will not compare things that only have one letter, but it still needs to be
         // lowercase
-        if ( word.size() == 1 ) return std::string { std::tolower ( word [0], loc ) };
+        if ( word.size() == 1 ) {
+            return std::wstring { static_cast<wchar_t> ( std::towlower ( word [0] ) ) };
+        }
 
-        const auto comparatorMod = [&loc] ( auto& a, auto& b ) {
-            a = std::tolower ( a, loc );
-            b = std::tolower ( b, loc );
+        const auto comparatorMod = [] ( auto& a, auto& b ) {
+            a = std::towlower ( a );
+            b = std::towlower ( b );
 
             return a < b;
         };
@@ -52,10 +52,10 @@ namespace
     }
 }
 
-void hemiola::Anagram::insert ( const std::string& word )
+void hemiola::Anagram::insert ( const std::wstring& word )
 {
     // keys are strings that are sorted lexicographically
-    const auto letters = sortToLower ( word );
+    const auto letters = sortTowlower ( word );
 
     if ( m_Anagrams.count ( letters ) != 0 ) {
         m_Anagrams.at ( letters ).push_back ( word );
@@ -64,12 +64,12 @@ void hemiola::Anagram::insert ( const std::string& word )
     }
 }
 
-std::vector<std::string> hemiola::Anagram::lookup ( std::string letters ) const
+std::vector<std::wstring> hemiola::Anagram::lookup ( std::wstring letters ) const
 {
     if ( letters.size() == 0 ) return {};
 
     // sort our letters so that we can lookup our key
-    letters = sortToLower ( letters );
+    letters = sortTowlower ( letters );
 
     if ( m_Anagrams.count ( letters ) != 0 ) {
         return m_Anagrams.at ( letters );

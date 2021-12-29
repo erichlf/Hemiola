@@ -19,16 +19,16 @@ namespace hemiola
         /*!
          * @brief insert word into data structure
          */
-        void insert ( const std::string& word );
+        void insert ( const std::wstring& word );
 
         /*!
          * @brief lookup up anagrams for given string
          * @param letters string to find anagrams for
          * @return vector containing anagrams
          */
-        std::vector<std::string> lookup ( std::string letters ) const;
+        std::vector<std::wstring> lookup ( std::wstring letters ) const;
 
     private:
-        std::unordered_map<std::string, std::vector<std::string>> m_Anagrams;
+        std::unordered_map<std::wstring, std::vector<std::wstring>> m_Anagrams;
     };
 }
