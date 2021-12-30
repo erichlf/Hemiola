@@ -42,6 +42,7 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable,
     : m_KeyReport {}
     , m_Repeats { 0 }
     , m_RepeatEnd { true }
+    , m_CapsLock { false }
     , m_KeyTable { std::move ( keyTable ) }
     , m_InputHID ( std::move ( device ) )
 {}
@@ -93,8 +94,10 @@ bool hemiola::KeyboardEvents::updateKeyState()
         } else {
             return updateKeyState();
         }
-    } else if ( m_KeyReport.modifiers == 0x00 ) {
-        // no modifier had been pressed so clear keys and no repeat
+    } else if ( m_KeyReport.modifiers == 0x00
+                || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_LEFTSHIFT )
+                || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_RIGHTSHIFT ) ) {
+        // no modifier or maybe shift was press pressed so clear keys
         m_KeyReport.keys = KeyArray { 0x00 };
     }
     m_Repeats = 0;

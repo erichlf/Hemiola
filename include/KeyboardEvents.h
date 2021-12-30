@@ -93,6 +93,11 @@ namespace hemiola
          */
         bool m_RepeatEnd;
 
+        /*!
+         * @brief flag indicating if caps lock is active
+         */
+        bool m_CapsLock;
+
         /*
          * @brief object containing the key map
          */
