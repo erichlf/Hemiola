@@ -116,6 +116,9 @@ bool hemiola::KeyboardEvents::updateKeyState()
             m_KeyReport.modifiers &= !m_KeyTable->modToHex ( KEY_RIGHTSHIFT );
         }
     } else {  // not a modifier
+        if ( scanCode > 128 ) {  // out of range scan code
+            return true;
+        }
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
         if ( m_KeyReport.keys [0] != scanHex && m_KeyReport.keys [1] != scanHex
              && m_KeyReport.keys [2] != scanHex && m_KeyReport.keys [3] != scanHex
