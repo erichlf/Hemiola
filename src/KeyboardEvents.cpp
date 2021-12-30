@@ -122,7 +122,10 @@ bool hemiola::KeyboardEvents::updateKeyState()
         } else if ( scanCode == KEY_LEFTMETA || scanCode == KEY_RIGHTMETA ) {
             // press and release of meta needs to be handled differently
             m_KeyState.meta = false;
-            m_KeyState.key = m_KeyTable->handleScanCode ( scanCode, m_KeyState );
+            // we never did a meta + key, so this was just a meta key press
+            if ( m_KeyState.key == std::nullopt ) {
+                m_KeyState.key = m_KeyTable->handleScanCode ( scanCode, m_KeyState );
+            }
             return true;
         }
 
