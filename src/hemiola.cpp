@@ -47,9 +47,6 @@ int main()
 
     KeyboardEvents eventHandler ( keys, input );
 
-    // for now we aren't going to do anything with the data
-    auto onEvent = [] ( std::variant<wchar_t, unsigned short> ) {};
-
     // the exception that will be thrown by keys
     std::exception_ptr e;
     auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
@@ -73,5 +70,5 @@ int main()
         }
     };
 
-    eventHandler.capture ( passThrough, onEvent, onError );
+    eventHandler.capture ( passThrough, onError );
 }

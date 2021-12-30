@@ -76,7 +76,7 @@ namespace hemiola
          * @param keyState the current state of the keypress
          * @return character representation of key press or nullopt if no representation found
          */
-        std::optional<wchar_t> handleScanCode ( unsigned int code, const KeyState& keyState ) const;
+        // std::optional<wchar_t> handleScanCode ( unsigned int code, const KeyState& keyState ) const;
 
         /*
          * @brief check if the scan code is a valid scan code

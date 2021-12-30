@@ -184,39 +184,39 @@ inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
     return index;
 }
 
-std::optional<wchar_t> hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& keyState ) const
-{
-    std::optional<wchar_t> wch;
-    if ( isCharKey ( code ) ) {
-        if ( keyState.altgr ) {
-            wch = altgrKeys ( code );
-            if ( wch == L'\0' ) {
-                if ( keyState.shift ) {
-                    wch = shiftKeys ( code );
-                } else {
-                    wch = charKeys ( code );
-                }
-            }
-        } else if ( keyState.capslock
-                    && iswalpha ( charKeys ( code ) ) ) {  // only bother with capslock if alpha
-            if ( keyState.shift ) {  // capslock and shift cancel each other
-                wch = charKeys ( code );
-            } else {
-                wch = shiftKeys ( code );
-            }
+// std::optional<wchar_t> hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& keyState ) const
+// {
+//     std::optional<wchar_t> wch;
+//     if ( isCharKey ( code ) ) {
+//         if ( keyState.altgr ) {
+//             wch = altgrKeys ( code );
+//             if ( wch == L'\0' ) {
+//                 if ( keyState.shift ) {
+//                     wch = shiftKeys ( code );
+//                 } else {
+//                     wch = charKeys ( code );
+//                 }
+//             }
+//         } else if ( keyState.capslock
+//                     && iswalpha ( charKeys ( code ) ) ) {  // only bother with capslock if alpha
+//             if ( keyState.shift ) {  // capslock and shift cancel each other
+//                 wch = charKeys ( code );
+//             } else {
+//                 wch = shiftKeys ( code );
+//             }
 
-            if ( wch == L'\0' ) {
-                wch = charKeys ( code );
-            }
-        } else if ( keyState.shift ) {
-            wch = shiftKeys ( code );
-            if ( wch == L'\0' ) {
-                wch = charKeys ( code );
-            }
-        } else {  // neither altgr nor shift are in use, this is a normal char
-            wch = charKeys ( code );
-        }
-    }
+//             if ( wch == L'\0' ) {
+//                 wch = charKeys ( code );
+//             }
+//         } else if ( keyState.shift ) {
+//             wch = shiftKeys ( code );
+//             if ( wch == L'\0' ) {
+//                 wch = charKeys ( code );
+//             }
+//         } else {  // neither altgr nor shift are in use, this is a normal char
+//             wch = charKeys ( code );
+//         }
+//     }
 
-    return wch;
-}
+//     return wch;
+// }

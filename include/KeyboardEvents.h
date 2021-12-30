@@ -32,26 +32,6 @@
 
 namespace hemiola
 {
-    /*!
-     * @brief struct which represents a keyboard event
-     */
-    struct KeyState
-    {
-        std::optional<wchar_t> key;
-        unsigned int repeats;  // count_repeats differs from the actual number of repeated
-        // characters! afaik, only the OS knows how these two values are
-        // related (by respecting configured repeat speed and delay)
-        bool repeatEnd;
-        input_event event;
-        bool scanCodeOk;
-        bool capslock = false;
-        bool shift = false;
-        bool alt = false;
-        bool altgr = false;
-        bool ctrl = false;
-        bool meta = false;
-    };
-
     using KeyArray = std::array<uint8_t, 6>;
     /*!
      * @brief struct describing the current key press
@@ -85,12 +65,10 @@ namespace hemiola
 
         /*!
          * @brief begin capturing keys
-         * @param passThrough function which will send data straight to output device
          * @param onEvent function which will handle any key capture events
          * @param onError function which will handle any errors that arise
          */
-        void capture ( std::function<void ( KeyReport )> passThrough,
-                       std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
+        void capture ( std::function<void ( KeyReport )> onEvent,
                        std::function<void ( std::exception_ptr )> onError );
 
     private:
@@ -101,25 +79,19 @@ namespace hemiola
         bool updateKeyState();
 
         /*!
-         * @brief handle the current event
-         * @param onEvent callback for when new event has been processed
-         * @post events are sent to the callback
-         * @note in the case of character keys a wchar_t is sent to the callback, however in
-         *       the case of a modifier, e.g. shift, nothing is given to the callback as those
-         *       keys act on the next character. For all other function keys the scan code is
-         *       send to the callback.
-         */
-        void captureEvent ( std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent );
-
-        /*!
-         * @brief the state of the key press
-         */
-        KeyState m_KeyState;
-
-        /*!
          * @brief the current key press
          */
         KeyReport m_KeyReport;
+
+        /*!
+         * @brief a count of the number of repeats
+         */
+        unsigned int m_Repeats;
+
+        /*!
+         * @brief flag indicating if a repeating key stroke has ended
+         */
+        bool m_RepeatEnd;
 
         /*
          * @brief object containing the key map
