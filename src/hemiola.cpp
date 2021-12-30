@@ -54,37 +54,18 @@ int main()
     std::exception_ptr e;
     auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
 
-    auto passThrough = [&keys, &output, &onError] ( KeyState keyState ) {
-        uint8_t modifier = 0x00;
-        if ( keyState.ctrl ) {
-            modifier |= keys->modToHex ( KEY_RIGHTCTRL );
-        }
-        if ( keyState.shift && !keyState.capslock ) {
-            modifier |= keys->modToHex ( KEY_RIGHTSHIFT );
-        } else if ( !keyState.shift && keyState.capslock ) {
-            if ( keyState.event.code != KEY_ENTER ) {
-                modifier |= keys->modToHex ( KEY_CAPSLOCK );
-            }
-        }
-        if ( keyState.alt ) {
-            modifier |= keys->modToHex ( KEY_LEFTALT );
-        }
-        if ( keyState.altgr ) {
-            modifier |= keys->modToHex ( KEY_RIGHTALT );
-        }
-        if ( keyState.meta ) {
-            modifier |= keys->modToHex ( KEY_LEFTMETA );
-        }
+    auto passThrough = [&keys, &output, &onError] ( KeyReport report ) {
         try {
             output->write ( std::vector<uint8_t> {
-                modifier,
+                report.modifiers,
                 0x00,
-                keys->scanToHex ( keyState.event.code ),
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00 } );
+                report.keys[0],
+                report.keys[1],
+                report.keys[2],
+                report.keys[3],
+                report.keys[4],
+                report.keys[5]
+                } );
             output->write (
                 std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
         } catch ( ... ) {

@@ -52,6 +52,23 @@ namespace hemiola
         bool meta = false;
     };
 
+    using KeyArray = std::array<uint8_t, 6>;
+    /*!
+     * @brief struct describing the current key press
+     */
+    struct KeyReport
+    {
+        /*!
+         * @modifier hex codes (bit 0 is L CTRL, bit 1 is L SHIFT, bit 2 is L ALT, bit 3 is L GUI,
+         *                      bit 4 is R CTRL, bit 5 is R SHIFT, bit 6 is R ALT, and bit 7 is R GUI).
+         */
+        uint8_t modifiers;
+        /*!
+         * @brief list of keys pressed with modifier (6 allowed)
+         */
+        KeyArray keys{};
+    };
+
     /*!
      * @brief class for capturing keyboard events
      */
@@ -72,7 +89,7 @@ namespace hemiola
          * @param onEvent function which will handle any key capture events
          * @param onError function which will handle any errors that arise
          */
-        void capture ( std::function<void ( KeyState )> passThrough,
+        void capture ( std::function<void ( KeyReport )> passThrough,
                        std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
                        std::function<void ( std::exception_ptr )> onError );
 
@@ -98,6 +115,11 @@ namespace hemiola
          * @brief the state of the key press
          */
         KeyState m_KeyState;
+
+        /*!
+         * @brief the current key press
+         */
+        KeyReport m_KeyReport;
 
         /*
          * @brief object containing the key map

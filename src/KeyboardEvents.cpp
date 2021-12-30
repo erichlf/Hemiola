@@ -46,13 +46,13 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, st
 {}
 
 void hemiola::KeyboardEvents::capture (
-    std::function<void ( KeyState )> passThrough,
+    std::function<void ( KeyReport )> passThrough,
     std::function<void ( std::variant<wchar_t, unsigned short> )> onEvent,
     std::function<void ( std::exception_ptr )> onError )
 {
     try {
         while ( updateKeyState() ) {
-            passThrough ( m_KeyState );  // send the scan code directly to the output
+            passThrough ( m_KeyReport );  // send the scan code directly to the output
             captureEvent ( onEvent );  // process the scan code
         }
     } catch ( ... ) {
@@ -106,11 +106,21 @@ bool hemiola::KeyboardEvents::updateKeyState()
         = m_KeyState.event.code;  // the key code of the pressed key (some codes are from "scan code
                                   // set 1", some are different (see <linux/input.h>)
 
+    // no modifier had been pressed so clear keys
+    if ( m_KeyReport.modifiers == 0x00 ) {
+        m_KeyReport.keys = KeyArray { 0x00 };
+    }
+
     m_KeyState.repeatEnd = false;
     if ( m_KeyState.event.value == EV_REPEAT ) {
         m_KeyState.repeats++;
         return true;
     } else if ( m_KeyState.event.value == EV_BREAK ) {
+        if ( m_KeyTable->isModifier ( scanCode ) ) {
+            m_KeyReport.modifiers
+                &= !m_KeyTable->modToHex ( scanCode );  // turn off only the current modifier
+            m_KeyReport.keys = KeyArray { 0x00 };
+        }
         if ( scanCode == KEY_LEFTSHIFT || scanCode == KEY_RIGHTSHIFT ) {
             m_KeyState.shift = false;
         } else if ( scanCode == KEY_RIGHTALT ) {
@@ -147,6 +157,23 @@ bool hemiola::KeyboardEvents::updateKeyState()
 
     if ( m_KeyState.event.value != EV_MAKE ) {
         return updateKeyState();
+    }
+
+    if ( m_KeyTable->isModifier ( scanCode ) ) {
+        m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
+    } else {  // not a modifier
+        const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
+        if ( m_KeyReport.keys [0] != scanHex && m_KeyReport.keys [1] != scanHex
+                    && m_KeyReport.keys [2] != scanHex && m_KeyReport.keys [3] != scanHex
+                    && m_KeyReport.keys [4] != scanHex && m_KeyReport.keys [5] != scanHex ) {
+            // add current key press to the list of key presses, and don't overwrite
+            for ( auto& code : m_KeyReport.keys ) {
+                if ( code == 0x00 ) {
+                    code = scanHex;
+                    break;
+                }
+            }
+        }
     }
 
     std::optional<wchar_t> wch;
