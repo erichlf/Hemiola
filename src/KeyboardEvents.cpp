@@ -108,6 +108,13 @@ bool hemiola::KeyboardEvents::updateKeyState()
 
     if ( m_KeyTable->isModifier ( scanCode ) ) {
         m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
+    } else if ( scanCode == KEY_CAPSLOCK ) {
+        m_CapsLock = !m_CapsLock;
+        if ( m_CapsLock ) {
+            m_KeyReport.modifiers |= m_KeyTable->modToHex ( KEY_RIGHTSHIFT );
+        } else {
+            m_KeyReport.modifiers &= !m_KeyTable->modToHex ( KEY_RIGHTSHIFT );
+        }
     } else {  // not a modifier
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
         if ( m_KeyReport.keys [0] != scanHex && m_KeyReport.keys [1] != scanHex
