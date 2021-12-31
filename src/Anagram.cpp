@@ -22,10 +22,9 @@
 #include <algorithm>
 #include <iostream>
 #include <locale>
-#include <utility>
-
 #include <nuspell/dictionary.hxx>
 #include <nuspell/finder.hxx>
+#include <utility>
 
 using namespace hemiola;
 
@@ -42,11 +41,13 @@ namespace
     {
         std::locale loc;
 
-        if ( word.size() == 0 ) return word;
+        if ( word.size() == 0 )
+            return word;
 
         // sort will not compare things that only have one letter, but it still needs to be
         // lowercase
-        if ( word.size() == 1 ) return std::string { std::tolower ( word [0], loc ) };
+        if ( word.size() == 1 )
+            return std::string { std::tolower ( word [0], loc ) };
 
         const auto comparatorMod = [&loc] ( auto& a, auto& b ) {
             a = std::tolower ( a, loc );
@@ -85,7 +86,8 @@ void hemiola::Anagram::insert ( const std::string& word )
 
 std::vector<std::string> hemiola::Anagram::lookup ( std::string letters ) const
 {
-    if ( letters.size() == 0 ) return {};
+    if ( letters.size() == 0 )
+        return {};
 
     // sort our letters so that we can lookup our key
     letters = sortToLower ( letters );

@@ -19,11 +19,12 @@
 */
 #include "HID.h"
 
-#include "Exceptions.h"
-
 #include <cassert>
+
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "Exceptions.h"
 
 using namespace hemiola;
 

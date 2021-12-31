@@ -17,12 +17,6 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include "Exceptions.h"
-#include "InputHID.h"
-#include "KeyboardEvents.h"
-#include "KeyTable.h"
-#include "OutputHID.h"
-
 #include <cstdint>
 #include <exception>
 #include <iomanip>
@@ -31,6 +25,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "Exceptions.h"
+#include "InputHID.h"
+#include "KeyTable.h"
+#include "KeyboardEvents.h"
+#include "OutputHID.h"
 
 int main()
 {
@@ -53,16 +53,14 @@ int main()
 
     auto passThrough = [&keys, &output, &onError] ( KeyReport report ) {
         try {
-            output->write ( std::vector<uint8_t> {
-                report.modifiers,
-                0x00,
-                report.keys[0],
-                report.keys[1],
-                report.keys[2],
-                report.keys[3],
-                report.keys[4],
-                report.keys[5]
-                } );
+            output->write ( std::vector<uint8_t> { report.modifiers,
+                                                   0x00,
+                                                   report.keys [0],
+                                                   report.keys [1],
+                                                   report.keys [2],
+                                                   report.keys [3],
+                                                   report.keys [4],
+                                                   report.keys [5] } );
             output->write (
                 std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
         } catch ( ... ) {

@@ -76,7 +76,8 @@ namespace hemiola
          * @param keyState the current state of the keypress
          * @return character representation of key press or nullopt if no representation found
          */
-        // std::optional<wchar_t> handleScanCode ( unsigned int code, const KeyState& keyState ) const;
+        // std::optional<wchar_t> handleScanCode ( unsigned int code, const KeyState& keyState )
+        // const;
 
         /*
          * @brief check if the scan code is a valid scan code
@@ -103,17 +104,14 @@ namespace hemiola
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t modToHex ( unsigned int code ) const {return m_ModiferHex.at ( code ); };
+        uint8_t modToHex ( unsigned int code ) const { return m_ModiferHex.at ( code ); };
 
         /*!
          * @brief determine if the scan code is a modifier key
          * @para code to check
          * @return true if the scan code is a modifier key
          */
-        bool isModifier ( unsigned int code ) const
-        {
-            return ( m_ModiferHex.count ( code ) != 0 );
-        }
+        bool isModifier ( unsigned int code ) const { return ( m_ModiferHex.count ( code ) != 0 ); }
 
     private:
         /*!
@@ -456,8 +454,8 @@ namespace hemiola
             // { KEY_MEDIA_REFRESH, 0xfa },
             // { KEY_MEDIA_CALC, 0xfb }
 
-            { KEY_LEFTMETA, 0xE3 },    // Keyboard Right GUI
-            { KEY_RIGHTMETA, 0xE7 },    // Keyboard Right GUI
+            { KEY_LEFTMETA, 0xE3 },   // Keyboard Right GUI
+            { KEY_RIGHTMETA, 0xE7 },  // Keyboard Right GUI
         };
 
         const std::unordered_map<int, uint8_t> m_ModiferHex = {
@@ -468,7 +466,7 @@ namespace hemiola
             { KEY_RIGHTCTRL, 0x10 },   // Keyboard Right Control
             { KEY_RIGHTSHIFT, 0x20 },  // Keyboard Right Shift
             { KEY_RIGHTALT, 0x40 },    // Keyboard Right Alt
-            { KEY_RIGHTMETA, 0x80 },    // Keyboard Right GUI
+            { KEY_RIGHTMETA, 0x80 },   // Keyboard Right GUI
         };
 
         const std::string m_CharOrFunc

@@ -40,13 +40,14 @@ namespace hemiola
     {
         /*!
          * @modifier hex codes (bit 0 is L CTRL, bit 1 is L SHIFT, bit 2 is L ALT, bit 3 is L GUI,
-         *                      bit 4 is R CTRL, bit 5 is R SHIFT, bit 6 is R ALT, and bit 7 is R GUI).
+         *                      bit 4 is R CTRL, bit 5 is R SHIFT, bit 6 is R ALT, and bit 7 is R
+         *                      GUI).
          */
         uint8_t modifiers;
         /*!
          * @brief list of keys pressed with modifier (6 allowed)
          */
-        KeyArray keys{};
+        KeyArray keys {};
     };
 
     /*!
@@ -92,11 +93,6 @@ namespace hemiola
          * @brief flag indicating if a repeating key stroke has ended
          */
         bool m_RepeatEnd;
-
-        /*!
-         * @brief flag indicating if caps lock is active
-         */
-        bool m_CapsLock;
 
         /*
          * @brief object containing the key map

@@ -17,14 +17,13 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "Anagram.h"
-
-#include <iostream>
-
-#include <string>
-#include <vector>
 
 TEST ( AnagramTest, NoAnagramTest )
 {
@@ -66,11 +65,11 @@ TEST ( AnagramTest, RepeatedLetterTest )
 
     auto result = anagram.lookup ( "AA" );
     EXPECT_EQ ( result.size(), 1 );
-    EXPECT_EQ ( result[0], "aa" );
+    EXPECT_EQ ( result [0], "aa" );
 
     result = anagram.lookup ( "A" );
     EXPECT_EQ ( result.size(), 1 );
-    EXPECT_EQ ( result[0], "a" );
+    EXPECT_EQ ( result [0], "a" );
 }
 
 TEST ( AnagramTest, SubwordTest )
@@ -82,7 +81,7 @@ TEST ( AnagramTest, SubwordTest )
 
     auto result = anagram.lookup ( "act" );
     EXPECT_EQ ( result.size(), 1 );
-    EXPECT_EQ ( result[0], "cat" );
+    EXPECT_EQ ( result [0], "cat" );
 }
 
 TEST ( AnagramTest, NonEnglishCharactersTest )
@@ -97,5 +96,5 @@ TEST ( AnagramTest, NonEnglishCharactersTest )
 
     result = anagram.lookup ( "äct" );
     EXPECT_EQ ( result.size(), 1 );
-    EXPECT_EQ ( result[0], "cät" );
+    EXPECT_EQ ( result [0], "cät" );
 }

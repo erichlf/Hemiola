@@ -19,9 +19,9 @@
 */
 #include "FakeInputHID.h"
 
-#include "Utils.h"
-
 #include <linux/input.h>
+
+#include "Utils.h"
 
 using namespace hemiola;
 
@@ -42,14 +42,14 @@ void hemiola::FakeInputHID::close()
 void hemiola::FakeInputHID::read ( input_event& event )
 {
     if ( m_Data.size() > 0 ) {
-        event = m_Data.back();
-        m_Data.pop_back();
+        event = m_Data.front();
+        m_Data.pop();
     } else {
         throw IoException ( "No more data to read.", 42 );
     }
 }
 
-void hemiola::FakeInputHID::setData ( const std::vector<input_event>& events )
+void hemiola::FakeInputHID::setData ( const std::queue<input_event>& events )
 {
     m_Data = events;
 }

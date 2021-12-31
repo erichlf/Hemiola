@@ -21,15 +21,15 @@
 
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
-#include "Exceptions.h"
-
 #include <stdio.h>
+
+#include "Exceptions.h"
+#include "KeyboardEvents.h"
 
 // these event.value-s aren't defined in <linux/input.h> ?
 #define EV_BREAK 0   // when key released
 #define EV_MAKE 1    // when key pressed
 #define EV_REPEAT 2  // when key switches to repeating after short delay
-
 
 #ifndef EXE_PS
     #define EXE_PS "/bin/ps"
@@ -79,5 +79,16 @@ namespace hemiola
         pclose ( pipe );
 
         return result;
+    }
+
+    /*!
+     * @brief comparison operator for KeyReport
+     */
+    inline bool operator== ( const KeyReport& lhs, const KeyReport& rhs )
+    {
+        return lhs.modifiers == rhs.modifiers
+               && ( lhs.keys [0] == rhs.keys [0] && lhs.keys [1] == rhs.keys [1]
+                    && lhs.keys [2] == rhs.keys [2] && lhs.keys [3] == rhs.keys [3]
+                    && lhs.keys [4] == rhs.keys [4] && lhs.keys [5] == rhs.keys [5] );
     }
 }

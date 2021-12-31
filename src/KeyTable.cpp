@@ -21,13 +21,13 @@
 
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
-#include "KeyboardEvents.h"
-#include "Utils.h"
-
 #include <bitset>
 #include <cassert>
 #include <sstream>
 #include <string>
+
+#include "KeyboardEvents.h"
+#include "Utils.h"
 
 using namespace hemiola;
 
@@ -143,9 +143,8 @@ bool hemiola::KeyTable::isUsedKey ( unsigned int code ) const
 
 int hemiola::KeyTable::toCharKeysIndex ( unsigned int code ) const
 {
-    int index = -1;  // not character code
-    if ( code >= KEY_1
-         && code <= KEY_EQUAL )  // codes 2-13: US keyboard: 1, 2, ..., 0, -, =
+    int index = -1;                            // not character code
+    if ( code >= KEY_1 && code <= KEY_EQUAL )  // codes 2-13: US keyboard: 1, 2, ..., 0, -, =
         index = code - 2;
     if ( code >= KEY_Q && code <= KEY_RIGHTBRACE )  // codes 16-27: q, w, ..., [, ]
         index = code - 4;
@@ -162,7 +161,7 @@ int hemiola::KeyTable::toCharKeysIndex ( unsigned int code ) const
 
 inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
 {
-    int index = -1;  // not character code
+    int index = -1;         // not character code
     if ( code == KEY_ESC )  // 1
         index = 0;
     if ( code >= KEY_BACKSPACE && code <= KEY_TAB )  // 14-15
@@ -170,7 +169,7 @@ inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
     if ( code >= KEY_ENTER && code <= KEY_LEFTCTRL )  // 28-29
         index = code - 25;
     if ( code == KEY_LEFTSHIFT )
-        index = code - 37;                                  // 42
+        index = code - 37;                              // 42
     if ( code >= KEY_RIGHTSHIFT && code <= KEY_KPDOT )  // 54-83
         index = code - 48;
     if ( code >= KEY_F11 && code <= KEY_F12 )  // 87-88
@@ -184,7 +183,8 @@ inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
     return index;
 }
 
-// std::optional<wchar_t> hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState& keyState ) const
+// std::optional<wchar_t> hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState&
+// keyState ) const
 // {
 //     std::optional<wchar_t> wch;
 //     if ( isCharKey ( code ) ) {

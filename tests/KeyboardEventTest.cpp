@@ -17,100 +17,103 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include <exception>
+#include <iostream>
+#include <queue>
+#include <string>
+
 #include <gtest/gtest.h>
+#include <linux/input.h>
 
 #include "Exceptions.h"
 #include "FakeInputHID.h"
 #include "KeyboardEvents.h"
 #include "Utils.h"
 
-#include <exception>
-#include <iostream>
-#include <string>
-#include <vector>
+namespace hemiola
+{
+    class Test
+    {
+    public:
+        Test()
+            : m_ExpectedData {}
+            , m_ReceivedData {}
+            , m_Data {}
+        {}
 
-#include <linux/input.h>
+        Test ( const Test& ) = delete;
+        Test ( Test&& ) = delete;
+        Test& operator= ( const Test& ) = delete;
+        Test& operator= ( Test&& ) = delete;
+        ~Test() = default;
+
+        void addData ( input_event event, KeyReport report )
+        {
+            m_Data.push ( event );
+            m_ExpectedData.push ( report );
+        }
+
+        void run()
+        {
+            auto device = std::make_shared<FakeInputHID>();
+            device->setData ( m_Data );
+
+            auto keyTable = std::make_shared<KeyTable>();
+
+            KeyboardEvents keys ( keyTable, device );
+            // all data should be passed to output initially
+            auto onEvent = [this] ( KeyReport report ) { m_ReceivedData.push ( report ); };
+
+            // the exception that will be thrown by keys
+            auto onError = [this] ( std::exception_ptr exc ) { m_E = exc; };
+
+            // normally this would be run in its own thread
+            keys.capture ( onEvent, onError );
+        }
+
+        std::queue<KeyReport> m_ExpectedData;
+        std::queue<KeyReport> m_ReceivedData;
+        std::exception_ptr m_E;
+
+    private:
+        std::queue<input_event> m_Data;
+    };
+}
 
 TEST ( KeyboardEventTest, KeyPressTest )
 {
-    auto device = std::make_shared<hemiola::FakeInputHID>();
-    device->open();
+    using namespace hemiola;
 
-    std::vector<input_event> data;
-    std::vector<unsigned short> expectedPassData;
-    std::vector<std::variant<wchar_t, unsigned short>> expectedData;
-    std::variant<wchar_t, unsigned short> empty;
-    auto addData
-        = [&data, &expectedData, &expectedPassData, &empty] ( const input_event& event,
-                                           const std::variant<wchar_t, unsigned short>& letter ) {
-              data.push_back ( event );
-              // expectedPassData.push_back ( event.code );
-              if ( letter != empty ) {
-                  expectedData.push_back ( letter );
-              }
-          };
+    hemiola::Test test;
 
     // invalid scanCode
-    addData ( input_event { .type = EV_KEY, .code = 129, .value = EV_MAKE },
-              static_cast<unsigned short> ( 129 ) );
+    test.addData ( input_event { .type = EV_KEY, .code = 129, .value = EV_MAKE }, KeyReport {} );
 
-    // valid scan codes
-    addData ( input_event { .type = EV_KEY, .code = KEY_5, .value = EV_MAKE }, wchar_t ( '5' ) );
-    addData ( input_event { .type = EV_KEY, .code = KEY_M, .value = EV_MAKE }, wchar_t ( 'm' ) );
-    addData ( input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE },
-              wchar_t ( '\\' ) );
+    // no modifiers
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_5, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x22, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_M, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x31, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
 
-    // ctrl + c
-    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK }, empty );
-    addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE },
-              static_cast<unsigned short> ( KEY_RIGHTCTRL ) );
-    addData ( input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE }, wchar_t ( 'c' ) );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x45, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
 
-    addData ( input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE },
-              static_cast<unsigned short> ( KEY_F12 ) );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x2e, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
 
-    // shift + z
-    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK }, empty );
-    addData ( input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE }, wchar_t ( 'Z' ) );
-    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE }, empty );
+    test.run();
 
-    // shift was pressed but then released, so we shouldn't see a shift key in this case
-    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK }, empty );
-    addData ( input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE }, empty );
-    addData ( input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE },
-              wchar_t ( '=' ) );
-
-    device->setData ( data );
-    // receivedData will be the reverse of this data, because I didn't use a queue
-    std::reverse ( expectedData.begin(), expectedData.end() );
-    std::reverse ( expectedPassData.begin(), expectedPassData.end() );
-
-    auto keyTable = std::make_shared<hemiola::KeyTable>();
-
-    hemiola::KeyboardEvents keys ( keyTable, device );
-    // all data should be passed to output initially
-    std::vector<unsigned short> passData;
-    auto passThrough = [&passData] ( hemiola::KeyReport report ) {
-        // passData.push_back ( keyState.event.code );
-    };
-
-    // data that will be captured by keys
-    std::vector<std::variant<wchar_t, unsigned short>> receivedData;
-    // auto onEvent = [&receivedData] ( std::variant<wchar_t, unsigned short> event ) {
-    //     receivedData.push_back ( event );
-    // };
-
-    // the exception that will be thrown by keys
-    std::exception_ptr e;
-    auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
-
-    // normally this would be run in its own thread
-    keys.capture ( passThrough, onError );
-
-    if ( e != nullptr ) {
+    if ( test.m_E != nullptr ) {
         try {
-            std::rethrow_exception ( e );
-        } catch ( const hemiola::IoException& ex ) {
+            std::rethrow_exception ( test.m_E );
+        } catch ( const IoException& ex ) {
             EXPECT_EQ ( ex.what(), std::string ( "No more data to read." ) );
             EXPECT_EQ ( ex.code(), 42 );
         } catch ( ... ) {
@@ -120,14 +123,106 @@ TEST ( KeyboardEventTest, KeyPressTest )
         FAIL() << "Expected an Exception but didn't get one.";
     }
 
-    // EXPECT_EQ ( passData.size(), expectedPassData.size() );
+    EXPECT_EQ ( test.m_ReceivedData.size(), test.m_ExpectedData.size() );
 
-    // for ( int i = 0; i < expectedPassData.size(); ++i ) {
-    //     EXPECT_EQ ( passData.at ( i ), expectedPassData.at ( i ) );
-    // }
+    for ( int i = 0; i < test.m_ExpectedData.size(); ++i ) {
+        EXPECT_EQ ( test.m_ReceivedData.front(), test.m_ExpectedData.front() );
+        test.m_ReceivedData.pop();
+        test.m_ExpectedData.pop();
+    }
+}
 
-    EXPECT_EQ ( receivedData.size(), expectedData.size() );
-    for ( int i = 0; i < expectedData.size(); ++i ) {
-        EXPECT_EQ ( receivedData.at ( i ), expectedData.at ( i ) );
+TEST ( KeyboardEventTest, ModifierTest )
+{
+    using namespace hemiola;
+
+    hemiola::Test test;
+
+    // ctrl + alt + c
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE },
+                   KeyReport { .modifiers = 0x04 | 0x10,
+                               .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData ( input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE },
+                   KeyReport { .modifiers = 0x04 | 0x10,
+                               .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_BREAK },
+        KeyReport { .modifiers = 0x10, .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_BREAK },
+                   KeyReport { .modifiers = 0x00 | 0x00,
+                               .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    // alt + a + b + c + d + e + f
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_A, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_B, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_D, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_E, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_F, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_BREAK },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+
+    // // shift + z
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x1d, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    // shift + a
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_A, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+
+    // shift was pressed but then released, so we shouldn't see a shift key in this case
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE },
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.addData (
+        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK },
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+
+    test.run();
+
+    if ( test.m_E != nullptr ) {
+        try {
+            std::rethrow_exception ( test.m_E );
+        } catch ( const IoException& ex ) {
+            EXPECT_EQ ( ex.what(), std::string ( "No more data to read." ) );
+            EXPECT_EQ ( ex.code(), 42 );
+        } catch ( ... ) {
+            FAIL() << "Expected an IoException but got something else.";
+        }
+    } else {
+        FAIL() << "Expected an Exception but didn't get one.";
+    }
+
+    EXPECT_EQ ( test.m_ReceivedData.size(), test.m_ExpectedData.size() );
+
+    for ( int i = 0; i < test.m_ExpectedData.size(); ++i ) {
+        EXPECT_EQ ( test.m_ReceivedData.front(), test.m_ExpectedData.front() );
+        test.m_ReceivedData.pop();
+        test.m_ExpectedData.pop();
     }
 }

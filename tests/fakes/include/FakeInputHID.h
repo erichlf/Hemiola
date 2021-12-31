@@ -19,9 +19,9 @@
 */
 #pragma once
 
-#include "InputHID.h"
+#include <queue>
 
-#include <vector>
+#include "InputHID.h"
 
 namespace hemiola
 {
@@ -62,12 +62,12 @@ namespace hemiola
          * @brief sets the data to send to whatever calls read
          * @param events the events to stream
          */
-        void setData ( const std::vector<input_event>& events );
+        void setData ( const std::queue<input_event>& events );
 
     private:
         /*!
          * @brief data to be output from read
          */
-        std::vector<input_event> m_Data;
+        std::queue<input_event> m_Data;
     };
 }

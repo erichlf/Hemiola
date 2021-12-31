@@ -19,11 +19,11 @@
 */
 #pragma once
 
-#include "HID.h"
-
 #include <cstdint>
 #include <string>
 #include <vector>
+
+#include "HID.h"
 
 namespace hemiola
 {
@@ -36,7 +36,7 @@ namespace hemiola
         /*!
          * @copydoc HID::HID(const std::string&)
          */
-        explicit OutputHID ( const std::string& device  = "/dev/hidg0" );
+        explicit OutputHID ( const std::string& device = "/dev/hidg0" );
         OutputHID ( const OutputHID& ) = delete;
         OutputHID ( OutputHID&& ) = delete;
         OutputHID& operator= ( const OutputHID& ) = delete;

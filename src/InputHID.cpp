@@ -19,20 +19,20 @@
 */
 #include "InputHID.h"
 
-#include "Exceptions.h"
-#include "Utils.h"
-
 #include <algorithm>
 #include <cassert>
-#include <fcntl.h>
 #include <fstream>
 #include <iostream>
 #include <queue>
 #include <sstream>
-#include <unistd.h>
 #include <utility>
 
+#include <fcntl.h>
 #include <linux/input.h>
+#include <unistd.h>
+
+#include "Exceptions.h"
+#include "Utils.h"
 
 using namespace hemiola;
 using ScoredHID = std::pair<std::string, unsigned short>;
@@ -51,8 +51,12 @@ void hemiola::InputHID::open()
 std::string hemiola::InputHID::getInputHID()
 {
     // better be safe than sory: while running other programs, switch user to nobody from root
-    setegid ( 65534 );
-    seteuid ( 65534 );
+    if ( setegid ( 65534 ) < 0 ) {
+        throw CodedException ( "Unable to set user group to 65534", errno );
+    }
+    if ( seteuid ( 65534 ) < 0 ) {
+        throw CodedException ( "Unable to set user id to 65534", errno );
+    }
 
     // Look for devices with keybit bitmask that has keys a keyboard does
     // If a bitmask ends with 'e', it supports KEY_2, KEY_1, KEY_ESC, and KEY_RESERVED is set to 0,
@@ -72,9 +76,8 @@ std::string hemiola::InputHID::getInputHID()
         throw;
     }
 
-    auto comparator = [] ( const ScoredHID& dev1, const ScoredHID& dev2 ) {
-        return dev1.second > dev2.second;
-    };
+    auto comparator
+        = [] ( const ScoredHID& dev1, const ScoredHID& dev2 ) { return dev1.second > dev2.second; };
     std::priority_queue<ScoredHID, std::vector<ScoredHID>, decltype ( comparator )> devices (
         comparator );
     std::string line;
@@ -127,8 +130,12 @@ std::string hemiola::InputHID::getInputHID()
     }
 
     // now we reclaim those root privileges
-    seteuid ( 0 );
-    setegid ( 0 );
+    if ( setegid ( 0 ) < 0 ) {
+        throw CodedException ( "Unable to set user group to 0", errno );
+    }
+    if ( seteuid ( 0 ) < 0 ) {
+        throw CodedException ( "Unable to set user id to 0", errno );
+    }
 
     // Choose device with the best score
     return devices.top().first;

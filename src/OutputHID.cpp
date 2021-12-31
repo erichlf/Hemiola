@@ -19,14 +19,14 @@
 */
 #include "OutputHID.h"
 
-#include "Exceptions.h"
-
 #include <cassert>
-#include <fcntl.h>
-#include <unistd.h>
 #include <vector>
 
+#include <fcntl.h>
 #include <linux/input.h>
+#include <unistd.h>
+
+#include "Exceptions.h"
 
 using namespace hemiola;
 
@@ -44,8 +44,7 @@ void hemiola::OutputHID::write ( const std::vector<uint8_t>& data )
     assert ( m_Opened );
     assert ( !data.empty() );
 
-    if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() )
-         <= 0 ) {
+    if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() ) <= 0 ) {
         throw IoException ( "Unable to write to output device", errno );
     }
 }

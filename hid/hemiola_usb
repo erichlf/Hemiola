@@ -19,6 +19,8 @@
   SOFTWARE.
 '
 
+set -e
+
 # This was stolen from https://randomnerdtutorials.com/raspberry-pi-zero-usb-keyboard-hid/
 cd /sys/kernel/config/usb_gadget/
 mkdir -p hemiola

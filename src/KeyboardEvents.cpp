@@ -20,6 +20,7 @@
 
 #include "KeyboardEvents.h"
 
+#include <bitset>
 #include <cassert>
 #include <cwctype>
 #include <iostream>
@@ -42,7 +43,6 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable,
     : m_KeyReport {}
     , m_Repeats { 0 }
     , m_RepeatEnd { true }
-    , m_CapsLock { false }
     , m_KeyTable { std::move ( keyTable ) }
     , m_InputHID ( std::move ( device ) )
 {}
@@ -84,20 +84,21 @@ bool hemiola::KeyboardEvents::updateKeyState()
     } else if ( event.value == EV_BREAK ) {
         // turn off the current modifier
         if ( m_KeyTable->isModifier ( scanCode ) ) {
-            m_KeyReport.modifiers &= !m_KeyTable->modToHex ( scanCode );
-            m_KeyReport.keys = KeyArray { 0x00 };
+            m_KeyReport.modifiers &= ~m_KeyTable->modToHex ( scanCode );
+            if ( m_KeyReport.modifiers == 0x00 ) {
+                m_KeyReport.keys = KeyArray { 0x00 };
+            }
         }
 
         m_RepeatEnd = m_Repeats > 0;
-        if ( m_RepeatEnd ) {
-            return true;
-        } else {
-            return updateKeyState();
-        }
+        return true;
     } else if ( m_KeyReport.modifiers == 0x00
                 || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_LEFTSHIFT )
-                || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_RIGHTSHIFT ) ) {
-        // no modifier or maybe shift was press pressed so clear keys
+                || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_RIGHTSHIFT )
+                || m_KeyReport.modifiers
+                       == ( m_KeyTable->modToHex ( KEY_LEFTSHIFT )
+                            | m_KeyTable->modToHex ( KEY_RIGHTSHIFT ) ) ) {
+        // no modifier or maybe shift is being held down so clear keys
         m_KeyReport.keys = KeyArray { 0x00 };
     }
     m_Repeats = 0;
@@ -108,14 +109,7 @@ bool hemiola::KeyboardEvents::updateKeyState()
 
     if ( m_KeyTable->isModifier ( scanCode ) ) {
         m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
-    } else if ( scanCode == KEY_CAPSLOCK ) {
-        m_CapsLock = !m_CapsLock;
-        if ( m_CapsLock ) {
-            m_KeyReport.modifiers |= m_KeyTable->modToHex ( KEY_RIGHTSHIFT );
-        } else {
-            m_KeyReport.modifiers &= !m_KeyTable->modToHex ( KEY_RIGHTSHIFT );
-        }
-    } else {  // not a modifier
+    } else {                     // not a modifier
         if ( scanCode > 128 ) {  // out of range scan code
             return true;
         }
