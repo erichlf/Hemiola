@@ -41,8 +41,7 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable )
 hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable,
                                           std::shared_ptr<InputHID> device )
     : m_KeyReport {}
-    , m_Repeats { 0 }
-    , m_RepeatEnd { true }
+    , m_Repeat { false }
     , m_KeyTable { std::move ( keyTable ) }
     , m_InputHID ( std::move ( device ) )
 {}
@@ -78,33 +77,37 @@ bool hemiola::KeyboardEvents::updateKeyState()
     // the key code of the pressed key
     unsigned short scanCode = event.code;
 
-    m_RepeatEnd = false;
     if ( event.value == EV_REPEAT ) {
+        m_Repeat = true;
         return true;
     } else if ( event.value == EV_BREAK ) {
         // turn off the current modifier
         if ( m_KeyTable->isModifier ( scanCode ) ) {
             m_KeyReport.modifiers &= ~m_KeyTable->modToHex ( scanCode );
-            if ( m_KeyReport.modifiers == 0x00 ) {
-                m_KeyReport.keys = KeyArray { 0x00 };
-            }
         }
 
-        m_RepeatEnd = m_Repeats > 0;
-        return true;
-    } else if ( m_KeyReport.modifiers == 0x00
-                || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_LEFTSHIFT )
-                || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_RIGHTSHIFT )
-                || m_KeyReport.modifiers
-                       == ( m_KeyTable->modToHex ( KEY_LEFTSHIFT )
-                            | m_KeyTable->modToHex ( KEY_RIGHTSHIFT ) ) ) {
-        // no modifier or maybe shift is being held down so clear keys
-        m_KeyReport.keys = KeyArray { 0x00 };
+        if ( m_KeyReport.modifiers == 0x00 ) {
+            m_KeyReport.keys = KeyArray { 0x00 };
+        }
+
+        if ( !m_Repeat ) {
+            m_Repeat = false;
+            return true;
+        }
     }
-    m_Repeats = 0;
 
     if ( event.value != EV_MAKE ) {
         return updateKeyState();
+    }
+
+    if ( m_KeyReport.modifiers == 0x00
+         || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_LEFTSHIFT )
+         || m_KeyReport.modifiers == m_KeyTable->modToHex ( KEY_RIGHTSHIFT )
+         || m_KeyReport.modifiers
+                == ( m_KeyTable->modToHex ( KEY_LEFTSHIFT )
+                     | m_KeyTable->modToHex ( KEY_RIGHTSHIFT ) ) ) {
+        // no modifier or maybe shift is being held down so clear keys
+        m_KeyReport.keys = KeyArray { 0x00 };
     }
 
     if ( m_KeyTable->isModifier ( scanCode ) ) {

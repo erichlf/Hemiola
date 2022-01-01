@@ -90,14 +90,9 @@ namespace hemiola
         KeyReport m_KeyReport;
 
         /*!
-         * @brief a count of the number of repeats
-         */
-        unsigned int m_Repeats;
-
-        /*!
          * @brief flag indicating if a repeating key stroke has ended
          */
-        bool m_RepeatEnd;
+        bool m_Repeat;
 
         /*
          * @brief object containing the key map

@@ -71,11 +71,35 @@ namespace hemiola
             keys.capture ( onEvent, onError );
         }
 
+        void checkException() {
+            if ( m_E != nullptr ) {
+                try {
+                    std::rethrow_exception ( m_E );
+                } catch ( const IoException& ex ) {
+                    EXPECT_EQ ( ex.what(), std::string ( "No more data to read." ) );
+                    EXPECT_EQ ( ex.code(), 42 );
+                } catch ( ... ) {
+                    FAIL() << "Expected an IoException but got something else.";
+                }
+            } else {
+                FAIL() << "Expected an Exception but didn't get one.";
+            }
+        }
+
+        void checkData() {
+            EXPECT_EQ ( m_ReceivedData.size(), m_ExpectedData.size() );
+
+            for ( int i = 0; i < m_ExpectedData.size(); ++i ) {
+                EXPECT_EQ ( m_ReceivedData.front(), m_ExpectedData.front() );
+                m_ReceivedData.pop();
+                m_ExpectedData.pop();
+            }
+        }
+
+    private:
         std::queue<KeyReport> m_ExpectedData;
         std::queue<KeyReport> m_ReceivedData;
         std::exception_ptr m_E;
-
-    private:
         std::queue<input_event> m_Data;
     };
 }
@@ -99,37 +123,17 @@ TEST ( KeyboardEventTest, KeyPressTest )
     test.addData (
         input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE },
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x31, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-
     test.addData (
         input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE },
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x45, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-
     test.addData (
         input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE },
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x2e, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
 
     test.run();
+    test.checkException();
+    test.checkData();
 
-    if ( test.m_E != nullptr ) {
-        try {
-            std::rethrow_exception ( test.m_E );
-        } catch ( const IoException& ex ) {
-            EXPECT_EQ ( ex.what(), std::string ( "No more data to read." ) );
-            EXPECT_EQ ( ex.code(), 42 );
-        } catch ( ... ) {
-            FAIL() << "Expected an IoException but got something else.";
-        }
-    } else {
-        FAIL() << "Expected an Exception but didn't get one.";
-    }
-
-    EXPECT_EQ ( test.m_ReceivedData.size(), test.m_ExpectedData.size() );
-
-    for ( int i = 0; i < test.m_ExpectedData.size(); ++i ) {
-        EXPECT_EQ ( test.m_ReceivedData.front(), test.m_ExpectedData.front() );
-        test.m_ReceivedData.pop();
-        test.m_ExpectedData.pop();
-    }
 }
 
 TEST ( KeyboardEventTest, ModifierTest )
@@ -154,6 +158,7 @@ TEST ( KeyboardEventTest, ModifierTest )
     test.addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_BREAK },
                    KeyReport { .modifiers = 0x00 | 0x00,
                                .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+
     // alt + a + b + c + d + e + f
     test.addData (
         input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_MAKE },
@@ -187,6 +192,7 @@ TEST ( KeyboardEventTest, ModifierTest )
     test.addData (
         input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE },
         KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x1d, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+
     // shift + a
     test.addData (
         input_event { .type = EV_KEY, .code = KEY_A, .value = EV_MAKE },
@@ -204,25 +210,6 @@ TEST ( KeyboardEventTest, ModifierTest )
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
 
     test.run();
-
-    if ( test.m_E != nullptr ) {
-        try {
-            std::rethrow_exception ( test.m_E );
-        } catch ( const IoException& ex ) {
-            EXPECT_EQ ( ex.what(), std::string ( "No more data to read." ) );
-            EXPECT_EQ ( ex.code(), 42 );
-        } catch ( ... ) {
-            FAIL() << "Expected an IoException but got something else.";
-        }
-    } else {
-        FAIL() << "Expected an Exception but didn't get one.";
-    }
-
-    EXPECT_EQ ( test.m_ReceivedData.size(), test.m_ExpectedData.size() );
-
-    for ( int i = 0; i < test.m_ExpectedData.size(); ++i ) {
-        EXPECT_EQ ( test.m_ReceivedData.front(), test.m_ExpectedData.front() );
-        test.m_ReceivedData.pop();
-        test.m_ExpectedData.pop();
-    }
+    test.checkException();
+    test.checkData();
 }
