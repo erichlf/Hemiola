@@ -51,6 +51,11 @@ namespace hemiola
     };
 
     /*!
+     * @brief comparison operator for KeyReport
+     */
+    bool operator== ( const KeyReport& lhs, const KeyReport& rhs );
+
+    /*!
      * @brief class for capturing keyboard events
      */
     class KeyboardEvents
