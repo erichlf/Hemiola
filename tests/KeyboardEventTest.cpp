@@ -71,7 +71,8 @@ namespace hemiola
             keys.capture ( onEvent, onError );
         }
 
-        void checkException() {
+        void checkException()
+        {
             if ( m_E != nullptr ) {
                 try {
                     std::rethrow_exception ( m_E );
@@ -86,7 +87,8 @@ namespace hemiola
             }
         }
 
-        void checkData() {
+        void checkData()
+        {
             EXPECT_EQ ( m_ReceivedData.size(), m_ExpectedData.size() );
 
             for ( int i = 0; i < m_ExpectedData.size(); ++i ) {
@@ -133,7 +135,6 @@ TEST ( KeyboardEventTest, KeyPressTest )
     test.run();
     test.checkException();
     test.checkData();
-
 }
 
 TEST ( KeyboardEventTest, ModifierTest )
