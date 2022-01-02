@@ -20,17 +20,17 @@
 
 #include "KeyboardEvents.h"
 
+#include "Exceptions.h"
+#include "KeyTable.h"
+#include "Utils.h"
+
+#include <linux/input.h>
+
 #include <bitset>
 #include <cassert>
 #include <cwctype>
 #include <iostream>
 #include <string>
-
-#include <linux/input.h>
-
-#include "Exceptions.h"
-#include "KeyTable.h"
-#include "Utils.h"
 
 using namespace hemiola;
 
@@ -79,10 +79,10 @@ bool hemiola::KeyboardEvents::updateKeyState()
     if ( event.value == EV_REPEAT ) {
         return true;
     } else if ( event.value == EV_BREAK ) {
-        // turn off the current modifier
-        if ( m_KeyTable->isModifier ( scanCode ) ) {
+        // we need to check if the key is a modifier first for this to work correctly
+        if ( m_KeyTable->isModifier ( scanCode ) ) {  // turn off the current modifier
             m_KeyReport.modifiers &= ~m_KeyTable->modToHex ( scanCode );
-        } else {
+        } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
             const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
             // find the key and set to 0
             for ( auto& code : m_KeyReport.keys ) {
@@ -96,16 +96,15 @@ bool hemiola::KeyboardEvents::updateKeyState()
         return true;
     }
 
+    // this was not a key press so move on
     if ( event.value != EV_MAKE ) {
         return updateKeyState();
     }
 
+    // we need to check if the key is a modifier first for this to work correctly
     if ( m_KeyTable->isModifier ( scanCode ) ) {
         m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
-    } else {                     // not a modifier
-        if ( scanCode > 128 ) {  // out of range scan code
-            return true;
-        }
+    } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
         if ( m_KeyReport.keys [0] != scanHex && m_KeyReport.keys [1] != scanHex
              && m_KeyReport.keys [2] != scanHex && m_KeyReport.keys [3] != scanHex

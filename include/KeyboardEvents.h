@@ -19,16 +19,14 @@
 */
 #pragma once
 
-#include <exception>
-#include <functional>
-#include <memory>
-#include <optional>
-#include <variant>
+#include "InputHID.h"
+#include "KeyTable.h"
 
 #include <linux/input.h>
 
-#include "InputHID.h"
-#include "KeyTable.h"
+#include <exception>
+#include <functional>
+#include <memory>
 
 namespace hemiola
 {

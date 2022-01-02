@@ -19,9 +19,9 @@
 */
 #pragma once
 
-#include <string>
-
 #include "HID.h"
+
+#include <string>
 
 // forward declaration
 struct input_event;

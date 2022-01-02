@@ -19,9 +19,9 @@
 */
 #pragma once
 
-#include <queue>
-
 #include "InputHID.h"
+
+#include <queue>
 
 namespace hemiola
 {

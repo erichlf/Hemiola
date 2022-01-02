@@ -17,18 +17,18 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include <exception>
-#include <iostream>
-#include <queue>
-#include <string>
-
-#include <gtest/gtest.h>
-#include <linux/input.h>
-
 #include "Exceptions.h"
 #include "FakeInputHID.h"
 #include "KeyboardEvents.h"
 #include "Utils.h"
+
+#include <gtest/gtest.h>
+#include <linux/input.h>
+
+#include <exception>
+#include <iostream>
+#include <queue>
+#include <string>
 
 namespace hemiola
 {
@@ -166,8 +166,8 @@ TEST ( KeyboardEventTest, KeyPressTest )
     hemiola::Test test;
 
     // invalid scanCode
-    test.press ( 129, KeyReport {} );
-    test.release ( 129, KeyReport {} );
+    test.press ( 1029, KeyReport {} );
+    test.release ( 1029, KeyReport {} );
 
     // no modifiers
     test.press (

@@ -21,13 +21,13 @@
 
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
+#include "KeyboardEvents.h"
+#include "Utils.h"
+
 #include <bitset>
 #include <cassert>
 #include <sstream>
 #include <string>
-
-#include "KeyboardEvents.h"
-#include "Utils.h"
 
 using namespace hemiola;
 
@@ -181,6 +181,26 @@ inline int hemiola::KeyTable::toFuncKeysIndex ( unsigned int code ) const
     if ( code >= KEY_LEFTMETA && code <= KEY_COMPOSE )  // 125-127
         index = code - 70;
     return index;
+}
+
+uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
+{
+    try {
+        return m_HexValues.at ( code );
+    } catch ( ... ) {
+        std::cerr << "Unknown key code: " << code << "\n";
+        return 0x00;
+    }
+}
+
+uint8_t hemiola::KeyTable::modToHex ( unsigned int code ) const
+{
+    try {
+        return m_ModiferHex.at ( code );
+    } catch ( ... ) {
+        std::cerr << "Unknown key code: " << code << "\n";
+        return 0x00;
+    }
 }
 
 // std::optional<wchar_t> hemiola::KeyTable::handleScanCode ( unsigned int code, const KeyState&

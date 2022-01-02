@@ -21,10 +21,10 @@
 
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
-#include <stdio.h>
-
 #include "Exceptions.h"
 #include "KeyboardEvents.h"
+
+#include <stdio.h>
 
 // these event.value-s aren't defined in <linux/input.h> ?
 #define EV_BREAK 0   // when key released

@@ -19,15 +19,15 @@
 */
 #include "OutputHID.h"
 
-#include <cassert>
-#include <vector>
+#include "Exceptions.h"
+#include "KeyboardEvents.h"
 
 #include <fcntl.h>
 #include <linux/input.h>
 #include <unistd.h>
 
-#include "Exceptions.h"
-#include "KeyboardEvents.h"
+#include <cassert>
+#include <vector>
 
 using namespace hemiola;
 

@@ -19,9 +19,9 @@
 */
 #include "FakeInputHID.h"
 
-#include <linux/input.h>
-
 #include "Utils.h"
+
+#include <linux/input.h>
 
 using namespace hemiola;
 

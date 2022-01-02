@@ -21,13 +21,14 @@
 
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
+#include <linux/input.h>
+
 #include <cstring>
+#include <iostream>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include <linux/input.h>
 
 namespace hemiola
 {
@@ -90,28 +91,34 @@ namespace hemiola
          * @brief convert a scan code (keyboard position) to the corresponding hex value
          * @param code the keyboard position to convert to hex
          * @return the hex value corresponding to the scan code
-         * @throw std::exception if the code does not have a hex representation
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t scanToHex ( unsigned int code ) const { return m_HexValues.at ( code ); };
+        uint8_t scanToHex ( unsigned int code ) const;
 
         /*!
          * @brief convert a scan code (keyboard position) to the corresponding modifier hex value
          * @param code the keyboard position to convert to modifier hex
          * @return the modifier hex value corresponding to the scan code
-         * @throw std::exception if the code does not have a hex representation
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t modToHex ( unsigned int code ) const { return m_ModiferHex.at ( code ); };
+        uint8_t modToHex ( unsigned int code ) const;
 
         /*!
          * @brief determine if the scan code is a modifier key
-         * @para code to check
+         * @param code to check
          * @return true if the scan code is a modifier key
          */
         bool isModifier ( unsigned int code ) const { return ( m_ModiferHex.count ( code ) != 0 ); }
+
+        /*!
+         * @brief determine if the scan code is a valid key non modifier key press represented in
+         *        our keytable
+         * @param code to check
+         * @return true if the scan code is a valid key
+         */
+        bool isKeyValid ( unsigned int code ) const { return m_HexValues.count ( code ) != 0; }
 
     private:
         /*!

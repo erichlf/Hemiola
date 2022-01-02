@@ -17,6 +17,12 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include "Exceptions.h"
+#include "InputHID.h"
+#include "KeyTable.h"
+#include "KeyboardEvents.h"
+#include "OutputHID.h"
+
 #include <cstdint>
 #include <exception>
 #include <iomanip>
@@ -26,14 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "Exceptions.h"
-#include "InputHID.h"
-#include "KeyTable.h"
-#include "KeyboardEvents.h"
-#include "OutputHID.h"
-
 int main()
-{
+try {
     using namespace hemiola;
 
     // TODO: Implement a config to get out devices and key maps
@@ -62,12 +62,10 @@ int main()
     eventHandler.capture ( passThrough, onError );
 
     if ( e != nullptr ) {
-        try {
-            std::rethrow_exception ( e );
-        } catch ( const CodedException& exc ) {
-            std::cerr << "Exception caught: " << exc.what() << ", " << exc.code() << "\n";
-        } catch ( const std::exception& exc ) {
-            std::cerr << "Exception caugt: " << exc.what() << "\n";
-        }
+        std::rethrow_exception ( e );
     }
+} catch ( const hemiola::CodedException& exc ) {
+    std::cerr << "Exception caught: " << exc.what() << ", " << exc.code() << "\n";
+} catch ( const std::exception& exc ) {
+    std::cerr << "Exception caught: " << exc.what() << "\n";
 }

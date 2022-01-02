@@ -17,13 +17,13 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include <iostream>
-#include <string>
-#include <vector>
+#include "Anagram.h"
 
 #include <gtest/gtest.h>
 
-#include "Anagram.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
 TEST ( AnagramTest, NoAnagramTest )
 {

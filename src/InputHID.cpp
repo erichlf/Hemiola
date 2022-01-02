@@ -19,6 +19,13 @@
 */
 #include "InputHID.h"
 
+#include "Exceptions.h"
+#include "Utils.h"
+
+#include <fcntl.h>
+#include <linux/input.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -26,13 +33,6 @@
 #include <queue>
 #include <sstream>
 #include <utility>
-
-#include <fcntl.h>
-#include <linux/input.h>
-#include <unistd.h>
-
-#include "Exceptions.h"
-#include "Utils.h"
 
 using namespace hemiola;
 using ScoredHID = std::pair<std::string, unsigned short>;

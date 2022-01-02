@@ -19,11 +19,11 @@
 */
 #pragma once
 
+#include "HID.h"
+
 #include <cstdint>
 #include <string>
 #include <vector>
-
-#include "HID.h"
 
 namespace hemiola
 {
