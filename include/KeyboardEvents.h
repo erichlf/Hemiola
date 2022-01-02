@@ -89,11 +89,6 @@ namespace hemiola
          */
         KeyReport m_KeyReport;
 
-        /*!
-         * @brief flag indicating if a repeating key stroke has ended
-         */
-        bool m_Repeat;
-
         /*
          * @brief object containing the key map
          */

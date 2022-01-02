@@ -51,22 +51,23 @@ int main()
     std::exception_ptr e;
     auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
 
-    auto passThrough = [&keys, &output, &onError] ( KeyReport report ) {
+    auto passThrough = [&output, &onError] ( KeyReport report ) {
         try {
-            output->write ( std::vector<uint8_t> { report.modifiers,
-                                                   0x00,
-                                                   report.keys [0],
-                                                   report.keys [1],
-                                                   report.keys [2],
-                                                   report.keys [3],
-                                                   report.keys [4],
-                                                   report.keys [5] } );
-            output->write (
-                std::vector<uint8_t> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } );
+            output->write ( report );
         } catch ( ... ) {
             onError ( std::current_exception() );
         }
     };
 
     eventHandler.capture ( passThrough, onError );
+
+    if ( e != nullptr ) {
+        try {
+            std::rethrow_exception ( e );
+        } catch ( const CodedException& exc ) {
+            std::cerr << "Exception caught: " << exc.what() << ", " << exc.code() << "\n";
+        } catch ( const std::exception& exc ) {
+            std::cerr << "Exception caugt: " << exc.what() << "\n";
+        }
+    }
 }

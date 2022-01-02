@@ -70,4 +70,4 @@ namespace hemiola
          */
         std::queue<input_event> m_Data;
     };
-}
+}  // namespace hemiola

@@ -77,4 +77,4 @@ namespace hemiola
          */
         bool m_Opened;
     };
-}
+}  // namespace hemiola

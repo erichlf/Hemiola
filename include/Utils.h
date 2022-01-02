@@ -80,4 +80,4 @@ namespace hemiola
 
         return result;
     }
-}
+}  // namespace hemiola

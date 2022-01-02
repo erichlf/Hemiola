@@ -27,6 +27,9 @@
 
 namespace hemiola
 {
+    // forward declarations
+    struct KeyReport;
+
     /*!
      * @brief simple class handling communication with input device
      */
@@ -50,10 +53,10 @@ namespace hemiola
 
         /*!
          * @brief write scan code to hid
-         * @param data byte data for the keypress to send to HID output
+         * @param report byte data for the keypress to send to HID output
          * @throw IoException if we are unable to write to device
          * @assumption device has been opened for writing
          */
-        void write ( const std::vector<uint8_t>& data );
+        void write ( const KeyReport& report ) const;
     };
-}
+}  // namespace hemiola

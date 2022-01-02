@@ -61,4 +61,4 @@ namespace hemiola
          */
         std::string getInputHID();
     };
-}
+}  // namespace hemiola

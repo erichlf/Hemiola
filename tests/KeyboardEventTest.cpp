@@ -32,6 +32,9 @@
 
 namespace hemiola
 {
+    /*!
+     * @brief test class for simulating key presses
+     */
     class Test
     {
     public:
@@ -47,12 +50,32 @@ namespace hemiola
         Test& operator= ( Test&& ) = delete;
         ~Test() = default;
 
-        void addData ( input_event event, KeyReport report )
+        /*!
+         * @brief release the given key
+         * @param key the key to be pressed
+         * @param report the expected result
+         * @post the simulated key press and the expected result are saved to test data
+         */
+        void press ( const unsigned short key, const KeyReport& report )
         {
-            m_Data.push ( event );
-            m_ExpectedData.push ( report );
+            addData ( input_event { .type = EV_KEY, .code = key, .value = EV_MAKE }, report );
         }
 
+        /*!
+         * @brief release the given key
+         * @param key the key to be released
+         * @param report the expected result
+         * @post the simulated key release and the expected result are saved to test data
+         */
+        void release ( const unsigned short key, const KeyReport& report )
+        {
+            addData ( input_event { .type = EV_KEY, .code = key, .value = EV_BREAK }, report );
+        }
+
+        /*!
+         * @brief run the simulated key presses
+         * @post simulated key press data is received
+         */
         void run()
         {
             auto device = std::make_shared<FakeInputHID>();
@@ -71,6 +94,9 @@ namespace hemiola
             keys.capture ( onEvent, onError );
         }
 
+        /*!
+         * @brief check that the correct exception was received at the end of our simulation
+         */
         void checkException()
         {
             if ( m_E != nullptr ) {
@@ -87,6 +113,9 @@ namespace hemiola
             }
         }
 
+        /*!
+         * @brief check if the simulated key presses and the expected results agree
+         */
         void checkData()
         {
             EXPECT_EQ ( m_ReceivedData.size(), m_ExpectedData.size() );
@@ -99,9 +128,33 @@ namespace hemiola
         }
 
     private:
+        /*!
+         * @brief add data a key press to the test data
+         * @param event the key press to simulate
+         * @param report the expected result
+         * @post the simulated key press/release and the expected result are saved to test data
+         */
+        void addData ( input_event event, KeyReport report )
+        {
+            m_Data.push ( event );
+            m_ExpectedData.push ( report );
+        }
+
+        /*!
+         * @brief the expected results from simulated key presses
+         */
         std::queue<KeyReport> m_ExpectedData;
+        /*!
+         * @brief the received results from simulated key presses
+         */
         std::queue<KeyReport> m_ReceivedData;
+        /*!
+         * @brief any exception received during the simulation
+         */
         std::exception_ptr m_E;
+        /*!
+         * @brief key presses to be simulated
+         */
         std::queue<input_event> m_Data;
     };
 }
@@ -113,24 +166,29 @@ TEST ( KeyboardEventTest, KeyPressTest )
     hemiola::Test test;
 
     // invalid scanCode
-    test.addData ( input_event { .type = EV_KEY, .code = 129, .value = EV_MAKE }, KeyReport {} );
+    test.press ( 129, KeyReport {} );
+    test.release ( 129, KeyReport {} );
 
     // no modifiers
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_5, .value = EV_MAKE },
+    test.press (
+        KEY_5,
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x22, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_M, .value = EV_MAKE },
+    test.release ( KEY_5, KeyReport {} );
+
+    test.press (
+        KEY_M,
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_BACKSLASH, .value = EV_MAKE },
+    test.release ( KEY_M, KeyReport {} );
+
+    test.press (
+        KEY_BACKSLASH,
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x31, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_F12, .value = EV_MAKE },
+    test.release ( KEY_BACKSLASH, KeyReport {} );
+
+    test.press (
+        KEY_F12,
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x45, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_EQUAL, .value = EV_MAKE },
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x2e, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release ( KEY_F12, KeyReport {} );
 
     test.run();
     test.checkException();
@@ -144,71 +202,90 @@ TEST ( KeyboardEventTest, ModifierTest )
     hemiola::Test test;
 
     // ctrl + alt + c
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_MAKE },
+    test.press (
+        KEY_LEFTALT,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_MAKE },
+    test.press ( KEY_RIGHTCTRL,
+                 KeyReport { .modifiers = 0x04 | 0x10,
+                             .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.press ( KEY_C,
+                 KeyReport { .modifiers = 0x04 | 0x10,
+                             .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release ( KEY_C,
                    KeyReport { .modifiers = 0x04 | 0x10,
                                .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData ( input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE },
-                   KeyReport { .modifiers = 0x04 | 0x10,
-                               .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_BREAK },
-        KeyReport { .modifiers = 0x10, .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData ( input_event { .type = EV_KEY, .code = KEY_RIGHTCTRL, .value = EV_BREAK },
-                   KeyReport { .modifiers = 0x00 | 0x00,
-                               .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release (
+        KEY_LEFTALT,
+        KeyReport { .modifiers = 0x10, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release ( KEY_RIGHTCTRL, KeyReport {} );
 
     // alt + a + b + c + d + e + f
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_MAKE },
+    test.press (
+        KEY_LEFTALT,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_A, .value = EV_MAKE },
+    test.press (
+        KEY_A,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_B, .value = EV_MAKE },
+    test.press (
+        KEY_B,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_C, .value = EV_MAKE },
+    test.press (
+        KEY_C,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_D, .value = EV_MAKE },
+    test.press (
+        KEY_D,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_E, .value = EV_MAKE },
+    test.press (
+        KEY_E,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_F, .value = EV_MAKE },
+    test.press (
+        KEY_F,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTALT, .value = EV_BREAK },
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    // no more than 6 keys can be pressed at once
+    test.press (
+        KEY_G,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
+    test.release (
+        KEY_G,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
+    // now release our keys
+    test.release (
+        KEY_A,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
+    test.release (
+        KEY_B,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x06, 0x07, 0x08, 0x09 } } );
+    test.release (
+        KEY_C,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x07, 0x08, 0x09 } } );
+    test.release (
+        KEY_D,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x08, 0x09 } } );
+    test.release (
+        KEY_E,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x09 } } );
+    test.release ( KEY_F, KeyReport { .modifiers = 0x04, .keys = KeyArray {} } );
+    test.release ( KEY_LEFTALT, KeyReport {} );
 
     // // shift + z
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE },
+    test.press (
+        KEY_LEFTSHIFT,
         KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_Z, .value = EV_MAKE },
+    test.press (
+        KEY_Z,
         KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x1d, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release ( KEY_Z, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
 
     // shift + a
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_A, .value = EV_MAKE },
+    test.press (
+        KEY_A,
         KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK },
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release ( KEY_A, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
+    test.release ( KEY_LEFTSHIFT, KeyReport {} );
 
-    // shift was pressed but then released, so we shouldn't see a shift key in this case
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_MAKE },
-        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
-    test.addData (
-        input_event { .type = EV_KEY, .code = KEY_LEFTSHIFT, .value = EV_BREAK },
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    // shift was pressed but then released
+    test.press ( KEY_LEFTSHIFT, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
+    test.release ( KEY_LEFTSHIFT, KeyReport {} );
 
     test.run();
     test.checkException();

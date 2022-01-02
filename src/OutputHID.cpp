@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "Exceptions.h"
+#include "KeyboardEvents.h"
 
 using namespace hemiola;
 
@@ -39,10 +40,14 @@ void hemiola::OutputHID::open()
     HID::open ( O_WRONLY | O_SYNC );
 }
 
-void hemiola::OutputHID::write ( const std::vector<uint8_t>& data )
+void hemiola::OutputHID::write ( const KeyReport& report ) const
 {
     assert ( m_Opened );
-    assert ( !data.empty() );
+
+    const auto data = std::vector<uint8_t> { report.modifiers, 0x00,
+                                             report.keys [0],  report.keys [1],
+                                             report.keys [2],  report.keys [3],
+                                             report.keys [4],  report.keys [5] };
 
     if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() ) <= 0 ) {
         throw IoException ( "Unable to write to output device", errno );
