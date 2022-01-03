@@ -6,21 +6,9 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/erichlf/Hemiola")
 
 option(BUILD_SHARED_LIBS "Build as shared library" ON)
 
-################## git our external dependencies ##################
-include(ExternalProject)
-find_package(Git REQUIRED)
+include(cmake/External.cmake)
 
-set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
-
-ExternalProject_Add(nuspell
-    PREFIX ${EXTERNAL_INSTALL_LOCATION}
-    GIT_REPOSITORY https://github.com/nuspell/nuspell
-    GIT_TAG "v5.0.1"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
-    )
-
-include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
-link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 ##################  create a hemiola library ##################
 add_library(hemiolalib
@@ -30,18 +18,18 @@ add_library(hemiolalib
     src/InputHID.cpp
     src/KeyTable.cpp
     src/KeyboardEvents.cpp
+    src/Logger.cpp
     src/OutputHID.cpp)
 
-add_dependencies(hemiolalib nuspell)
+add_dependencies(hemiolalib ${EXTERNAL_DEPENDENCIES})
 
-add_library(Nuspell::nuspell SHARED IMPORTED)
-
-target_link_libraries(hemiolalib ${EXTERNAL_INSTALL_LOCATION}/lib/libnuspell.so)
+target_link_libraries(hemiolalib ${EXTERNAL_LIBS})
 
 target_include_directories(hemiolalib
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
+    ${EXTERNAL_INCLUDE_DIRS}
     )
 
 set_target_properties(hemiolalib
@@ -49,7 +37,7 @@ set_target_properties(hemiolalib
     CXX_STANDARD 17
     )
 target_compile_options(hemiolalib PRIVATE
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wno-psabi>
     )
 
 ##################   create the executable for hemiola ##################
@@ -68,7 +56,7 @@ set_target_properties(hemiola
     CXX_STANDARD 17
     )
 target_compile_options(hemiola PRIVATE
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wno-psabi>
     )
 
 find_package(GTest 1.8)

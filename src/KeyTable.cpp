@@ -22,6 +22,7 @@
 /* a lot of this code was stolen from https://github.com/kernc/logkeys but then modified */
 
 #include "KeyboardEvents.h"
+#include "Logger.h"
 #include "Utils.h"
 
 #include <bitset>
@@ -188,7 +189,7 @@ uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
     try {
         return m_HexValues.at ( code );
     } catch ( ... ) {
-        std::cerr << "Unknown key code: " << code << "\n";
+        LOG ( ERROR, "Unknown key code: {}", code );
         return 0x00;
     }
 }
@@ -198,7 +199,7 @@ uint8_t hemiola::KeyTable::modToHex ( unsigned int code ) const
     try {
         return m_ModiferHex.at ( code );
     } catch ( ... ) {
-        std::cerr << "Unknown key code: " << code << "\n";
+        LOG ( ERROR, "Unknown modifier key code: {}", code );
         return 0x00;
     }
 }
