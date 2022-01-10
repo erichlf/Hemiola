@@ -39,7 +39,9 @@ namespace
      */
     std::wstring sortTowlower ( const std::wstring& word )
     {
-        if ( word.size() == 0 ) return word;
+        if ( word.size() == 0 ) {
+            return word;
+        }
 
         // sort will not compare things that only have one letter, but it still needs to be
         // lowercase
