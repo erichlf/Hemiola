@@ -20,6 +20,7 @@
 #include "HID.h"
 
 #include "Exceptions.h"
+#include "Logger.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -48,6 +49,7 @@ void hemiola::HID::open ( int perms )
     assert ( !m_HIDString.empty() );
     assert ( !m_Opened );
 
+    LOG ( INFO, "Opening device {} with permissions {}", m_HIDString, perms );
     // open input device for reading
     m_HIDId = ::open ( m_HIDString.c_str(), perms );
 

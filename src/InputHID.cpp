@@ -20,6 +20,7 @@
 #include "InputHID.h"
 
 #include "Exceptions.h"
+#include "Logger.h"
 #include "Utils.h"
 
 #include <fcntl.h>
@@ -72,7 +73,7 @@ std::string hemiola::InputHID::getInputHID()
         output << execute ( cmd );
     } catch ( const ExecutionException& e ) {
         // log the error and rethrow
-        std::cerr << "Failed to grep for keyboard device.\n";
+        LOG ( ERROR, "Failed to grep for keyboard device." );
         throw;
     }
 
@@ -123,10 +124,10 @@ std::string hemiola::InputHID::getInputHID()
     }
 
     if ( devices.size() == 0 ) {
+        LOG ( ERROR,
+              "Please post contents of your /proc/bus/input/devices file as a new bug report.\n"
+              "github.com/erichlf/hemiola" );
         throw KeyboardException ( "Couldn't determine keyboard." );
-        std::cerr
-            << "Please post contents of your /proc/bus/input/devices file as a new bug report.\n"
-               "github.com/erichlf/hemiola\n";
     }
 
     // now we reclaim those root privileges
@@ -136,6 +137,8 @@ std::string hemiola::InputHID::getInputHID()
     if ( seteuid ( 0 ) < 0 ) {
         throw CodedException ( "Unable to set user id to 0", errno );
     }
+
+    LOG ( INFO, "Found device: {}", devices.top().first );
 
     // Choose device with the best score
     return devices.top().first;

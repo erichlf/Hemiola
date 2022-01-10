@@ -21,8 +21,10 @@
 
 #include "Exceptions.h"
 #include "KeyboardEvents.h"
+#include "Logger.h"
 
 #include <fcntl.h>
+#include <fmt/ranges.h>
 #include <linux/input.h>
 #include <unistd.h>
 
@@ -35,6 +37,12 @@ hemiola::OutputHID::OutputHID ( const std::string& device )
     : HID ( device )
 {}
 
+hemiola::OutputHID::~OutputHID()
+{
+    // make sure all key presses are released
+    write ( KeyReport {} );
+}
+
 void hemiola::OutputHID::open()
 {
     HID::open ( O_WRONLY | O_SYNC );
@@ -44,6 +52,7 @@ void hemiola::OutputHID::write ( const KeyReport& report ) const
 {
     assert ( m_Opened );
 
+    LOG ( DEBUG, "Sending Report: {}, ({})", report.modifiers, fmt::join ( report.keys, ", " ) );
     const auto data = std::vector<uint8_t> { report.modifiers, 0x00,
                                              report.keys [0],  report.keys [1],
                                              report.keys [2],  report.keys [3],

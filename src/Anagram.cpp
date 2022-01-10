@@ -19,11 +19,15 @@
 */
 #include "Anagram.h"
 
+#include "Logger.h"
+
+#include <fmt/ranges.h>
+#include <nuspell/dictionary.hxx>
+#include <nuspell/finder.hxx>
+
 #include <algorithm>
 #include <iostream>
 #include <locale>
-#include <nuspell/dictionary.hxx>
-#include <nuspell/finder.hxx>
 #include <utility>
 
 using namespace hemiola;
@@ -93,6 +97,10 @@ std::vector<std::string> hemiola::Anagram::lookup ( std::string letters ) const
     letters = sortToLower ( letters );
 
     if ( m_Anagrams.count ( letters ) != 0 ) {
+        LOG ( DEBUG,
+              "Found the following anagrams for {}: ({})",
+              letters,
+              fmt::join ( m_Anagrams.at ( letters ), ", " ) );
         return m_Anagrams.at ( letters );
     } else {
         return {};

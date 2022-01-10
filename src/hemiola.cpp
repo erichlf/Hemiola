@@ -21,22 +21,30 @@
 #include "InputHID.h"
 #include "KeyTable.h"
 #include "KeyboardEvents.h"
+#include "Logger.h"
 #include "OutputHID.h"
 
+#include <csignal>
 #include <cstdint>
 #include <exception>
-#include <iomanip>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
+
+std::condition_variable cv;
+std::mutex mutex;
+
+// setup logging here so that the logger works in try catch block
+auto logger = hemiola::Logger();
 
 int main()
 try {
     using namespace hemiola;
+    std::unique_lock lock ( mutex );
 
-    // TODO: Implement a config to get out devices and key maps
+    // TODO: Implement a config to get our devices and key maps
     auto input = std::make_shared<InputHID>();
     auto output = std::make_shared<OutputHID>();
     auto keys = std::make_shared<KeyTable>();
@@ -49,7 +57,10 @@ try {
 
     // the exception that will be thrown by keys
     std::exception_ptr e;
-    auto onError = [&e] ( std::exception_ptr exc ) { e = exc; };
+    auto onError = [&e] ( std::exception_ptr exc ) {
+        e = exc;
+        cv.notify_all();
+    };
 
     auto passThrough = [&output, &onError] ( KeyReport report ) {
         try {
@@ -59,13 +70,26 @@ try {
         }
     };
 
-    eventHandler.capture ( passThrough, onError );
+    auto captureThread = std::thread ( [&eventHandler, &passThrough, &onError] {
+        eventHandler.capture ( std::ref ( passThrough ), std::ref ( onError ) );
+        cv.notify_all();
+    } );
+
+    // run until a signal is caught
+    cv.wait ( lock );
+    captureThread.join();
 
     if ( e != nullptr ) {
         std::rethrow_exception ( e );
     }
+
+    return EXIT_SUCCESS;
 } catch ( const hemiola::CodedException& exc ) {
-    std::cerr << "Exception caught: " << exc.what() << ", " << exc.code() << "\n";
+    LOG ( ERROR, "Exception caught: {}, {}", exc.what(), exc.code() );
+    spdlog::dump_backtrace();
+    return EXIT_FAILURE;
 } catch ( const std::exception& exc ) {
-    std::cerr << "Exception caught: " << exc.what() << "\n";
+    LOG ( ERROR, "Exception caught: {}", exc.what() );
+    spdlog::dump_backtrace();
+    return EXIT_FAILURE;
 }
