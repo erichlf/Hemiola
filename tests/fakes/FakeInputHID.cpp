@@ -17,40 +17,39 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#pragma once
+#include "FakeInputHID.h"
 
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include "Utils.h"
 
-namespace hemiola
+#include <linux/input.h>
+
+using namespace hemiola;
+
+hemiola::FakeInputHID::FakeInputHID()
+    : InputHID()
+{}
+
+void hemiola::FakeInputHID::open()
 {
-    /*!
-     * @brief class for determining the anagrams of a given string
-     */
-    class Anagram
-    {
-    public:
-        Anagram() = default;
-        Anagram ( const Anagram& ) = delete;
-        Anagram ( Anagram&& ) = delete;
-        Anagram& operator= ( const Anagram& ) = delete;
-        Anagram& operator= ( Anagram&& ) = delete;
-        ~Anagram() = default;
+    m_Opened = true;
+}
 
-        /*!
-         * @brief insert word into data structure
-         */
-        void insert ( const std::string& word );
+void hemiola::FakeInputHID::close()
+{
+    m_Opened = false;
+}
 
-        /*!
-         * @brief lookup up anagrams for given string
-         * @param letters string to find anagrams for
-         * @return vector containing anagrams
-         */
-        std::vector<std::string> lookup ( std::string letters ) const;
+void hemiola::FakeInputHID::read ( input_event& event )
+{
+    if ( m_Data.size() > 0 ) {
+        event = m_Data.front();
+        m_Data.pop();
+    } else {
+        throw IoException ( "No more data to read.", 42 );
+    }
+}
 
-    private:
-        std::unordered_map<std::string, std::vector<std::string>> m_Anagrams;
-    };
-}  // namespace hemiola
+void hemiola::FakeInputHID::setData ( const std::queue<input_event>& events )
+{
+    m_Data = events;
+}

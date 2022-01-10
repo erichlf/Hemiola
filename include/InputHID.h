@@ -19,38 +19,46 @@
 */
 #pragma once
 
+#include "HID.h"
+
 #include <string>
-#include <unordered_map>
-#include <vector>
+
+// forward declaration
+struct input_event;
 
 namespace hemiola
 {
     /*!
-     * @brief class for determining the anagrams of a given string
+     * @brief simple class handling communication with input device
      */
-    class Anagram
+    class InputHID : public HID
     {
     public:
-        Anagram() = default;
-        Anagram ( const Anagram& ) = delete;
-        Anagram ( Anagram&& ) = delete;
-        Anagram& operator= ( const Anagram& ) = delete;
-        Anagram& operator= ( Anagram&& ) = delete;
-        ~Anagram() = default;
+        InputHID();
+        InputHID ( const InputHID& ) = delete;
+        InputHID ( InputHID&& ) = delete;
+        InputHID& operator= ( const InputHID& ) = delete;
+        InputHID& operator= ( InputHID&& ) = delete;
+        ~InputHID() = default;
 
         /*!
-         * @brief insert word into data structure
+         * @copydoc HID::open
          */
-        void insert ( const std::string& word );
+        virtual void open();
 
         /*!
-         * @brief lookup up anagrams for given string
-         * @param letters string to find anagrams for
-         * @return vector containing anagrams
+         * @brief read event from device
+         * @param event input_event that we are going to save
+         * @throw IoException if we are unable to read from device
+         * @assumption device has been opened for reading
          */
-        std::vector<std::string> lookup ( std::string letters ) const;
+        virtual void read ( input_event& event );
 
-    private:
-        std::unordered_map<std::string, std::vector<std::string>> m_Anagrams;
+    protected:
+        /*!
+         * @brief look up keyboard
+         * @throw KeyboardException if a keyboard cannot be found
+         */
+        std::string getInputHID();
     };
 }  // namespace hemiola

@@ -1,12 +1,30 @@
+/*
+  MIT License
+  Copyright (c) 2021 Erich L Foster
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
 #include "Anagram.h"
 
 #include <algorithm>
 #include <iostream>
 #include <locale>
-#include <utility>
-
 #include <nuspell/dictionary.hxx>
 #include <nuspell/finder.hxx>
+#include <utility>
 
 using namespace hemiola;
 
@@ -23,11 +41,13 @@ namespace
     {
         std::locale loc;
 
-        if ( word.size() == 0 ) return word;
+        if ( word.size() == 0 )
+            return word;
 
         // sort will not compare things that only have one letter, but it still needs to be
         // lowercase
-        if ( word.size() == 1 ) return std::string { std::tolower ( word [0], loc ) };
+        if ( word.size() == 1 )
+            return std::string { std::tolower ( word [0], loc ) };
 
         const auto comparatorMod = [&loc] ( auto& a, auto& b ) {
             a = std::tolower ( a, loc );
@@ -66,7 +86,8 @@ void hemiola::Anagram::insert ( const std::string& word )
 
 std::vector<std::string> hemiola::Anagram::lookup ( std::string letters ) const
 {
-    if ( letters.size() == 0 ) return {};
+    if ( letters.size() == 0 )
+        return {};
 
     // sort our letters so that we can lookup our key
     letters = sortToLower ( letters );
