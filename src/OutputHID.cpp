@@ -17,41 +17,39 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include "OutputHID.h"
 
-#pragma once
+#include "Exceptions.h"
+#include "KeyboardEvents.h"
 
-#include <string>
-#include <unordered_map>
+#include <fcntl.h>
+#include <linux/input.h>
+#include <unistd.h>
+
+#include <cassert>
 #include <vector>
 
-namespace hemiola
+using namespace hemiola;
+
+hemiola::OutputHID::OutputHID ( const std::string& device )
+    : HID ( device )
+{}
+
+void hemiola::OutputHID::open()
 {
-    /*!
-     * @brief class for determining the anagrams of a given string
-     */
-    class Anagram
-    {
-    public:
-        Anagram() = default;
-        Anagram ( const Anagram& ) = delete;
-        Anagram ( Anagram&& ) = delete;
-        Anagram& operator= ( const Anagram& ) = delete;
-        Anagram& operator= ( Anagram&& ) = delete;
-        ~Anagram() = default;
+    HID::open ( O_WRONLY | O_SYNC );
+}
 
-        /*!
-         * @brief insert word into data structure
-         */
-        void insert ( const std::wstring& word );
+void hemiola::OutputHID::write ( const KeyReport& report ) const
+{
+    assert ( m_Opened );
 
-        /*!
-         * @brief lookup up anagrams for given string
-         * @param letters string to find anagrams for
-         * @return vector containing anagrams
-         */
-        std::vector<std::wstring> lookup ( std::wstring letters ) const;
+    const auto data = std::vector<uint8_t> { report.modifiers, 0x00,
+                                             report.keys [0],  report.keys [1],
+                                             report.keys [2],  report.keys [3],
+                                             report.keys [4],  report.keys [5] };
 
-    private:
-        std::unordered_map<std::wstring, std::vector<std::wstring>> m_Anagrams;
-    };
-}  // namespace hemiola
+    if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() ) <= 0 ) {
+        throw IoException ( "Unable to write to output device", errno );
+    }
+}

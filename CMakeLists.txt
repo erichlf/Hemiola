@@ -6,6 +6,7 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/erichlf/Hemiola")
 
 option(BUILD_SHARED_LIBS "Build as shared library" ON)
 
+################## git our external dependencies ##################
 include(ExternalProject)
 find_package(Git REQUIRED)
 
@@ -21,17 +22,42 @@ ExternalProject_Add(nuspell
 include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
 link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
 
-add_library(hemiola
+##################  create a hemiola library ##################
+add_library(hemiolalib
     SHARED
-    src/Anagram.cpp)
+    src/Anagram.cpp
+    src/HID.cpp
+    src/InputHID.cpp
+    src/KeyTable.cpp
+    src/KeyboardEvents.cpp
+    src/OutputHID.cpp)
 
-add_dependencies(hemiola nuspell)
+add_dependencies(hemiolalib nuspell)
 
 add_library(Nuspell::nuspell SHARED IMPORTED)
 
-target_link_libraries(hemiola ${EXTERNAL_INSTALL_LOCATION}/lib/libnuspell.so)
+target_link_libraries(hemiolalib ${EXTERNAL_INSTALL_LOCATION}/lib/libnuspell.so)
 
-target_include_directories(hemiola
+target_include_directories(hemiolalib
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    )
+
+set_target_properties(hemiolalib
+    PROPERTIES
+    CXX_STANDARD 17
+    )
+target_compile_options(hemiolalib PRIVATE
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+    )
+
+##################   create the executable for hemiola ##################
+add_executable(hemiola src/hemiola.cpp)
+
+target_link_libraries(hemiola PRIVATE hemiolalib)
+
+target_include_directories(hemiolalib
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>

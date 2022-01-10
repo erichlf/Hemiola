@@ -17,41 +17,51 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include "HID.h"
 
-#pragma once
+#include "Exceptions.h"
 
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <fcntl.h>
+#include <unistd.h>
 
-namespace hemiola
+#include <cassert>
+
+using namespace hemiola;
+
+hemiola::HID::HID ( const std::string& device )
+    : m_HIDId { -1 }
+    , m_HIDString { device }
+    , m_Opened { false }
+{}
+
+hemiola::HID::HID()
+    : HID ( "" )
+{}
+
+hemiola::HID::~HID()
 {
-    /*!
-     * @brief class for determining the anagrams of a given string
-     */
-    class Anagram
-    {
-    public:
-        Anagram() = default;
-        Anagram ( const Anagram& ) = delete;
-        Anagram ( Anagram&& ) = delete;
-        Anagram& operator= ( const Anagram& ) = delete;
-        Anagram& operator= ( Anagram&& ) = delete;
-        ~Anagram() = default;
+    close();
+}
 
-        /*!
-         * @brief insert word into data structure
-         */
-        void insert ( const std::wstring& word );
+void hemiola::HID::open ( int perms )
+{
+    assert ( !m_HIDString.empty() );
+    assert ( !m_Opened );
 
-        /*!
-         * @brief lookup up anagrams for given string
-         * @param letters string to find anagrams for
-         * @return vector containing anagrams
-         */
-        std::vector<std::wstring> lookup ( std::wstring letters ) const;
+    // open input device for reading
+    m_HIDId = ::open ( m_HIDString.c_str(), perms );
 
-    private:
-        std::unordered_map<std::wstring, std::vector<std::wstring>> m_Anagrams;
-    };
-}  // namespace hemiola
+    if ( m_HIDId == -1 ) {
+        throw IoException ( "Error opening input event device '" + m_HIDString + "'", errno );
+    }
+
+    m_Opened = true;
+}
+
+void hemiola::HID::close()
+{
+    if ( m_Opened ) {
+        ::close ( m_HIDId );
+        m_Opened = false;
+    }
+}

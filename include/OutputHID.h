@@ -17,41 +17,46 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-
 #pragma once
 
+#include "HID.h"
+
+#include <cstdint>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace hemiola
 {
+    // forward declarations
+    struct KeyReport;
+
     /*!
-     * @brief class for determining the anagrams of a given string
+     * @brief simple class handling communication with input device
      */
-    class Anagram
+    class OutputHID : public HID
     {
     public:
-        Anagram() = default;
-        Anagram ( const Anagram& ) = delete;
-        Anagram ( Anagram&& ) = delete;
-        Anagram& operator= ( const Anagram& ) = delete;
-        Anagram& operator= ( Anagram&& ) = delete;
-        ~Anagram() = default;
+        /*!
+         * @copydoc HID::HID(const std::string&)
+         */
+        explicit OutputHID ( const std::string& device = "/dev/hidg0" );
+        OutputHID ( const OutputHID& ) = delete;
+        OutputHID ( OutputHID&& ) = delete;
+        OutputHID& operator= ( const OutputHID& ) = delete;
+        OutputHID& operator= ( OutputHID&& ) = delete;
+        ~OutputHID() = default;
 
         /*!
-         * @brief insert word into data structure
+         * @copydoc HID::open
          */
-        void insert ( const std::wstring& word );
+        virtual void open();
 
         /*!
-         * @brief lookup up anagrams for given string
-         * @param letters string to find anagrams for
-         * @return vector containing anagrams
+         * @brief write scan code to hid
+         * @param report byte data for the keypress to send to HID output
+         * @throw IoException if we are unable to write to device
+         * @assumption device has been opened for writing
          */
-        std::vector<std::wstring> lookup ( std::wstring letters ) const;
-
-    private:
-        std::unordered_map<std::wstring, std::vector<std::wstring>> m_Anagrams;
+        void write ( const KeyReport& report ) const;
     };
 }  // namespace hemiola
