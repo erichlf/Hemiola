@@ -1,4 +1,5 @@
-# About Hemiola
+# Hemiola
+## About Hemiola
 
 Hemiola aims to turn any n-key rollover keyboard into a chordable keyboard.
 Instead of typing one letter at a time one would press multiple letters at
@@ -7,13 +8,13 @@ in order. The only physical requirements are a usb keyboard and a
 Rapberry Pi Zero. There are no dependency requirements on the OS side of
 things.
 
-# Building Hemiola
-## Build Dependencies
-  - C++ 17 compiler, GCC >= v8, Clang >= v7, MSVC >= 2017
-  - CMake >= v3.12
-  - ICU4C
+## Building Hemiola
+### Build Dependencies
+- C++17 compiler, GCC >= v8, Clang >= v7, MSVC >= 2017
+- CMake >= v3.12
+- ICU4C
 
-## Building on GNU/Linux and Unixes
+### Building on GNU/Linux and Unixes
 
 We first need to download the dependencies. Some may already be
 preinstalled.
@@ -40,14 +41,14 @@ cmake --build ./build
 cmake --install ./build
 ```
 
-# Setting Up HID
-## Dependencies
-  - Raspberry Pi Zero Running Raspberry Pi OS
-  - Micro USB Cable
+## Setting Up HID
+### Dependencies
+- Raspberry Pi Zero Running Raspberry Pi OS
+- Micro USB Cable
 
-## Setting up Raspberry Pi
+### Setting up Raspberry Pi
 
-```
+```bash
 ssh pi@<ip-address-of-rpi>
 
 sudo apt install git
@@ -66,15 +67,21 @@ sudo shutdown
 Now plug your raspberry pi into your computer. To test that things are working:
 1. on the machine connected to the rpi open a text editor and let it sit open
 2. on a separate machine from the one that is connected to your rpi
-```
+```bash
 ssh pi@<ip-address-of-rpi>
 
 cd hemiola/hid
 sudo python3 testHID.py
 ```
 3. on the machine connected to the rpi you should see
-```
-Hemiola
-works
-```
+> Hemiola
+> works
 in the editor that you left open.
+
+## Running Hemiola
+To run hemiola one simply can execute the following command on your rpi:
+```bash
+sudo ./hemiola/build/hemiola
+```
+
+Currently logging is output to `/var/log/hemiola.log`

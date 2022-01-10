@@ -44,7 +44,7 @@ namespace hemiola
         OutputHID ( OutputHID&& ) = delete;
         OutputHID& operator= ( const OutputHID& ) = delete;
         OutputHID& operator= ( OutputHID&& ) = delete;
-        ~OutputHID() = default;
+        ~OutputHID();
 
         /*!
          * @copydoc HID::open

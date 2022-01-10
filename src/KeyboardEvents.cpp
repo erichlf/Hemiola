@@ -22,6 +22,7 @@
 
 #include "Exceptions.h"
 #include "KeyTable.h"
+#include "Logger.h"
 #include "Utils.h"
 
 #include <linux/input.h>
@@ -53,7 +54,7 @@ void hemiola::KeyboardEvents::capture ( std::function<void ( KeyReport )> onEven
             onEvent ( m_KeyReport );  // send the scan code directly to the output
         }
     } catch ( ... ) {
-        std::cerr << "Input device closed unexpectedly.\n";
+        LOG ( ERROR, "Input device closed unexpectedly" );
         m_InputHID->close();
         onError ( std::current_exception() );
     }
@@ -65,9 +66,14 @@ bool hemiola::KeyboardEvents::updateKeyState()
     try {
         m_InputHID->read ( event );
     } catch ( ... ) {
-        std::cerr << "Connection to keyboard seems to have been lost while updating key state.\n";
+        LOG ( ERROR, "Connection to keyboard seems to have been lost while updating key state" );
         throw;
     }
+    LOG ( DEBUG,
+          "(event.type, event.value, event.code) = ({}, {}, {})",
+          event.type,
+          event.value,
+          event.code );
 
     if ( event.type != EV_KEY ) {
         return updateKeyState();  // keyboard events are always of type EV_KEY
@@ -103,9 +109,11 @@ bool hemiola::KeyboardEvents::updateKeyState()
 
     // we need to check if the key is a modifier first for this to work correctly
     if ( m_KeyTable->isModifier ( scanCode ) ) {
+        LOG ( DEBUG, "MAKE Modifer: {} -> {}", scanCode, m_KeyTable->modToHex ( scanCode ) );
         m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
     } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
+        LOG ( DEBUG, "MAKE key: {} -> {}", scanCode, scanHex );
         if ( m_KeyReport.keys [0] != scanHex && m_KeyReport.keys [1] != scanHex
              && m_KeyReport.keys [2] != scanHex && m_KeyReport.keys [3] != scanHex
              && m_KeyReport.keys [4] != scanHex && m_KeyReport.keys [5] != scanHex ) {
