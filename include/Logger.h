@@ -19,7 +19,7 @@
 */
 #pragma once
 
-#define SPDLOG_FMT_EXTERNAL 1
+#define SPDLOG_FMT_EXTERNAL
 #include <spdlog/spdlog.h>
 
 #include <memory>
