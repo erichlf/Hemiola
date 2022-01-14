@@ -43,6 +43,9 @@ hemiola::Logger::Logger ( const std::string& logFile,
                                                      sink,
                                                      spdlog::thread_pool(),
                                                      spdlog::async_overflow_policy::block );
+    // see a description of pattern setting at
+    // https://github.com/gabime/spdlog/wiki/3.-Custom-formatting#customizing-format-using-set_pattern
+    spdlog::set_pattern ( "[%Y-%m-%d %T.%e][%l][%t][%@]" );
     spdlog::enable_backtrace ( 32 );
     spdlog::flush_every ( std::chrono::seconds ( 3 ) );
     spdlog::register_logger ( m_Log );
