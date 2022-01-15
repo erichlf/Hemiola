@@ -24,13 +24,16 @@
 
 #include <memory>
 
+using spdlog::source_loc;
+using spdlog::level::level_enum;
 /*!
  * @brief macro defining logging. Use some preprocessor tricks to simply use INFO, DEBUG, etc.
  *        and only expand the variadic portion if there are arguments.
  */
-#define LOG( LEVEL, format, ... )                                                  \
-    spdlog::log ( static_cast<spdlog::level::level_enum> ( SPDLOG_LEVEL_##LEVEL ), \
-                  format,                                                          \
+#define LOG( LEVEL, format, ... )                                   \
+    spdlog::log ( source_loc { __FILE__, __LINE__, __FUNCTION__ },  \
+                  static_cast<level_enum> ( SPDLOG_LEVEL_##LEVEL ), \
+                  format,                                           \
                   ##__VA_ARGS__ );
 
 namespace hemiola
