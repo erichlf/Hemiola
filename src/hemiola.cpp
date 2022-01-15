@@ -39,8 +39,28 @@ std::mutex mutex;
 // setup logging here so that the logger works in try catch block
 auto logger = hemiola::Logger();
 
+static void signalHandler ( int sig )
+{
+    // Uninstall this handler, to avoid the possibility of an infinite regress
+    signal ( SIGSEGV, SIG_DFL );
+    signal ( SIGBUS, SIG_DFL );
+    signal ( SIGILL, SIG_DFL );
+    signal ( SIGABRT, SIG_DFL );
+    signal ( SIGFPE, SIG_DFL );
+
+    LOG ( ERROR, "Caught signal: {}", sig );
+    spdlog::dump_backtrace();
+    abort();
+}
+
 int main()
 try {
+    signal ( SIGSEGV, signalHandler );
+    signal ( SIGBUS, signalHandler );
+    signal ( SIGILL, signalHandler );
+    signal ( SIGABRT, signalHandler );
+    signal ( SIGFPE, signalHandler );
+
     using namespace hemiola;
     std::unique_lock lock ( mutex );
 
