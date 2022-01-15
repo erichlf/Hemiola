@@ -48,28 +48,7 @@ namespace hemiola
          * @brief Update our keymaps based on the system keymapping
          * @post keymaps are updated to coincide with the system keymap
          */
-        void determineSystemKeymap();
-
-        /*!
-         * @brief check if code is a char
-         * @param code the scan code from key press
-         * @return true if code is a char
-         */
-        bool isCharKey ( unsigned int code ) const;
-
-        /*!
-         * @brief check if code is a function key
-         * @param code the scan code from key press
-         * @return true if code is a function key
-         */
-        bool isFuncKey ( unsigned int code ) const;
-
-        /*!
-         * @brief check if code is used
-         * @param code the scan code from key press
-         * @return true if code is used
-         */
-        inline bool isUsedKey ( unsigned int code ) const;
+        // void determineSystemKeymap();
 
         /*!
          * @brief convert a scan code to a character
@@ -77,15 +56,8 @@ namespace hemiola
          * @param keyState the current state of the keypress
          * @return character representation of key press or nullopt if no representation found
          */
-        // std::optional<wchar_t> handleScanCode ( unsigned int code, const KeyState& keyState )
+        // std::optional<char_t> handleScanCode ( unsigned int code, const KeyState& keyState )
         // const;
-
-        /*
-         * @brief check if the scan code is a valid scan code
-         * @param code the scan code from key press
-         * @return true if the code is valid
-         */
-        bool isCodeValid ( unsigned int code ) const { return code < m_CharOrFunc.size(); }
 
         /*!
          * @brief convert a scan code (keyboard position) to the corresponding hex value
@@ -113,101 +85,115 @@ namespace hemiola
         bool isModifier ( unsigned int code ) const { return ( m_ModiferHex.count ( code ) != 0 ); }
 
         /*!
-         * @brief determine if the scan code is a valid key non modifier key press represented in
-         *        our keytable
+         * @brief determine if the scan code is a character key
+         * @param code to check
+         * @return true if the scan code is a character key
+         */
+        bool isCharKey ( unsigned int code ) const { return m_HexValues.count ( code ) != 0; }
+
+        /*!
+         * @brief determine if the scan code is a valid key in our keytable
          * @param code to check
          * @return true if the scan code is a valid key
          */
-        bool isKeyValid ( unsigned int code ) const { return m_HexValues.count ( code ) != 0; }
+        bool isKeyValid ( unsigned int code ) const
+        {
+            return isCharKey ( code ) || isModifier ( code );
+        }
 
     private:
         /*!
-         * @brief get the lower case character corresponding to a scan code
+         * @brief get the lower case string corresponding to a scan code
          * @param code the scan code from key press
-         * @return character representing the scan code
+         * @return string representing the scan code or empty string if not a valid key code
          */
-        wchar_t charKeys ( unsigned int code ) const
-        {
-            return m_CharKeys [toCharKeysIndex ( code )];
-        }
+        std::string charKeys ( unsigned int code ) const;
 
         /*!
-         * @brief get the upper character corresponding to a scan code
+         * @brief get the modifier key string corresponding to a scan code
          * @param code the scan code from key press
-         * @return character representing the scan code
+         * @return function key representing the scan code or empty string if not a valid key code
          */
-        wchar_t shiftKeys ( unsigned int code ) const
-        {
-            return m_ShiftKeys [toCharKeysIndex ( code )];
-        }
+        std::string modKeys ( unsigned int code ) const;
+
+        std::unordered_map<int, std::string> m_CharKeys = {
+            { KEY_A, "a" },  // Keyboard a and A
+            { KEY_B, "b" },  // Keyboard b and B
+            { KEY_C, "c" },  // Keyboard c and C
+            { KEY_D, "d" },  // Keyboard d and D
+            { KEY_E, "e" },  // Keyboard e and E
+            { KEY_F, "f" },  // Keyboard f and F
+            { KEY_G, "g" },  // Keyboard g and G
+            { KEY_H, "h" },  // Keyboard h and H
+            { KEY_I, "i" },  // Keyboard i and I
+            { KEY_J, "j" },  // Keyboard j and J
+            { KEY_K, "k" },  // Keyboard k and K
+            { KEY_L, "l" },  // Keyboard l and L
+            { KEY_M, "m" },  // Keyboard m and M
+            { KEY_N, "n" },  // Keyboard n and N
+            { KEY_O, "o" },  // Keyboard o and O
+            { KEY_P, "p" },  // Keyboard p and P
+            { KEY_Q, "q" },  // Keyboard q and Q
+            { KEY_R, "r" },  // Keyboard r and R
+            { KEY_S, "s" },  // Keyboard s and S
+            { KEY_T, "t" },  // Keyboard t and T
+            { KEY_U, "u" },  // Keyboard u and U
+            { KEY_V, "v" },  // Keyboard v and V
+            { KEY_W, "w" },  // Keyboard w and W
+            { KEY_X, "x" },  // Keyboard x and X
+            { KEY_Y, "y" },  // Keyboard y and Y
+            { KEY_Z, "z" },  // Keyboard z and Z
+
+            { KEY_1, "1" },  // Keyboard 1 and !
+            { KEY_2, "2" },  // Keyboard 2 and @
+            { KEY_3, "3" },  // Keyboard 3 and #
+            { KEY_4, "4" },  // Keyboard 4 and $
+            { KEY_5, "5" },  // Keyboard 5 and %
+            { KEY_6, "6" },  // Keyboard 6 and ^
+            { KEY_7, "7" },  // Keyboard 7 and &
+            { KEY_8, "8" },  // Keyboard 8 and *
+            { KEY_9, "9" },  // Keyboard 9 and (
+            { KEY_0, "0" },  // Keyboard 0 and )
+
+            { KEY_ENTER, "<ENTER/>" },          // Keyboard Return (ENTER)
+            { KEY_ESC, "<ESC/>" },              // Keyboard ESCAPE
+            { KEY_BACKSPACE, "<BACKSPACE/>" },  // Keyboard DELETE (Backspace)
+            { KEY_TAB, "<TAB/>" },              // Keyboard Tab
+            { KEY_SPACE, "<SPACE/>" },          // Keyboard Spacebar
+            { KEY_MINUS, "-" },                 // Keyboard - and _
+            { KEY_EQUAL, "=" },                 // Keyboard = and +
+            { KEY_LEFTBRACE, "[" },             // Keyboard [ and {
+            { KEY_RIGHTBRACE, "]" },            // Keyboard ] and }
+            { KEY_BACKSLASH, "\\" },            // Keyboard \ and |
+            { KEY_SEMICOLON, ";" },             // Keyboard ; and :
+            { KEY_APOSTROPHE, "'" },            // Keyboard ' and "
+            { KEY_GRAVE, "`" },                 // Keyboard ` and ~
+            { KEY_COMMA, "," },                 // Keyboard , and <
+            { KEY_DOT, "." },                   // Keyboard . and >
+            { KEY_SLASH, "/" },                 // Keyboard / and ?
+            { KEY_CAPSLOCK, "<CAPSLOCK/>" },    // Keyboard Caps Lock
+
+            { KEY_DELETE, "<DELETE/>" },  // Keyboard Delete Forward
+        };
 
         /*!
-         * @brief get the altgr character corresponding to a scan code
-         * @param code the scan code from key press
-         * @return character representing the scan code
+         * @brief Function Keys these will have slightly different representation since
+         *        they have a begin and an end, e.g. <LCTRL></LCTRL>
          */
-        wchar_t altgrKeys ( unsigned int code ) const
-        {
-            return m_AltgrKeys [toCharKeysIndex ( code )];
-        }
+        std::unordered_map<int, std::string> m_ModKeys {
+            { KEY_LEFTCTRL, "LCTRL" },     // Keyboard Left Control
+            { KEY_LEFTSHIFT, "LSHIFT" },   // Keyboard Left Shift
+            { KEY_LEFTALT, "LALT" },       // Keyboard Left Alt
+            { KEY_LEFTMETA, "LMETA" },     // Keyboard Left GUI
+            { KEY_RIGHTCTRL, "RCTRL" },    // Keyboard Right Control
+            { KEY_RIGHTSHIFT, "RSHIFT" },  // Keyboard Right Shift
+            { KEY_RIGHTALT, "RALT" },      // Keyboard Right Alt
+            { KEY_RIGHTMETA, "RMETA" },    // Keyboard Right GUI
+        };
 
         /*!
-         * @brief get the function key character corresponding to a scan code
-         * @param code the scan code from key press
-         * @return function key character representing the scan code
+         * @brief map of key code to hex value for key reports
          */
-        std::wstring funcKeys ( unsigned int code ) const
-        {
-            return m_FuncKeys [toFuncKeysIndex ( code )];
-        }
-
-        /*!
-         * @brief translates character keycodes to continuous array indexes
-         * @param code the scan code from key press
-         * @return the index of character from the keymap
-         */
-        int toCharKeysIndex ( unsigned int keycode ) const;
-
-        /*!
-         * @brief translates function keys keycodes to continuous array indexes
-         * @param code the scan code from key press
-         * @return the index of function key from the keymap
-         */
-        int toFuncKeysIndex ( unsigned int keycode ) const;
-
-        // these are ordered default US keymap keys
-        /*!
-         * @brief US lower case key characters
-         */
-        std::wstring m_CharKeys { L"1234567890-=qwertyuiop[]asdfghjkl;'`\\zxcvbnm,./<" };
-        /*!
-         * @brief US upper case key characters
-         */
-        std::wstring m_ShiftKeys { L"!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"~|ZXCVBNM<>?>" };
-        // TODO: add altgrShiftKeys[]
-        // (http://en.wikipedia.org/wiki/AltGr_key#US_international)
-        std::wstring m_AltgrKeys { 49, 0 };
-
-        /*!
-         * @brief Function Keys
-         */
-        const std::vector<std::wstring> m_FuncKeys
-            = { L"<Esc>",          L"<BckSp>", L"<Tab>",   L"<Enter>",
-                L"<LCtrl>",        L"<LShft>", L"<RShft>", L"<KP*>",
-                L"<LAlt>",         L" ",       L"<CpsLk>", L"<F1>",
-                L"<F2>",           L"<F3>",    L"<F4>",    L"<F5>",
-                L"<F6>",           L"<F7>",    L"<F8>",    L"<F9>",
-                L"<F10>",          L"<NumLk>", L"<ScrLk>", L"<KP7>",
-                L"<KP8>",          L"<KP9>",   L"<KP->",   L"<KP4>",
-                L"<KP5>",          L"<KP6>",   L"<KP+>",   L"<KP1>",
-                L"<KP2>",          L"<KP3>",   L"<KP0>",   L"<KP.>",
-                /*"<",*/ L"<F11>", L"<F12>",   L"<KPEnt>", L"<RCtrl>",
-                L"<KP/>",          L"<PrtSc>", L"<AltGr>", L"<Break>" /*linefeed?*/,
-                L"<Home>",         L"<Up>",    L"<PgUp>",  L"<Left>",
-                L"<Right>",        L"<End>",   L"<Down>",  L"<PgDn>",
-                L"<Ins>",          L"<Del>",   L"<Pause>", L"<LMeta>",
-                L"<RMeta>",        L"<Menu>" };
-
         // TODO: update this from key map
         std::unordered_map<int, uint8_t> m_HexValues = {
             /**
@@ -218,8 +204,9 @@ namespace hemiola
              * KEY_ERR_OVF in all slots to indicate this condition.
              */
 
-            // { KEY_NONE, 0x00 },     // No key pressed
-            // { KEY_ERR_OVF, 0x01 },  //  Keyboard Error Roll Over - used for all slots if too many
+            // { KEY_NONE, "NONE" },     // No key pressed
+            // { KEY_ERR_OVF, "ERR_OVF" },  //  Keyboard Error Roll Over - used for all slots if too
+            // many
             //  keys are pressed ("Phantom key")
             // 0x02 //  Keyboard POST Fail
             // 0x03 //  Keyboard Error Undefined
@@ -475,18 +462,6 @@ namespace hemiola
             { KEY_RIGHTALT, 0x40 },    // Keyboard Right Alt
             { KEY_RIGHTMETA, 0x80 },   // Keyboard Right GUI
         };
-
-        const std::string m_CharOrFunc
-            =  // c = character key, f = function key, _ = blank/error ('_' is used, don't change);
-               // all according to KEY_* defines from <linux/input.h>
-            "_fccccccccccccff"
-            "ccccccccccccffcc"
-            "ccccccccccfccccc"
-            "ccccccffffffffff"
-            "ffffffffffffffff"
-            "ffff__cff_______"
-            "ffffffffffffffff"
-            "_______f_____fff";
 
         unsigned short N_KEYS_DEFINED = 106;  // sum of all 'c' and 'f' chars in charOrFunc[]
     };
