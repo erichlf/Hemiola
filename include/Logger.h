@@ -25,40 +25,13 @@
 #include <memory>
 
 /*!
- * @brief enumerator defining log levels
+ * @brief macro defining logging. Use some preprocessor tricks to simply use INFO, DEBUG, etc.
+ *        and only expand the variadic portion if there are arguments.
  */
-enum
-{
-    INFO = 0,
-    ERROR,
-    WARN,
-    CRITICAL,
-    DEBUG,
-};
-
-/*!
- * @brief macro defining logging
- */
-#define LOG( LEVEL, ... )                     \
-    switch ( LEVEL ) {                        \
-        case ( INFO ):                        \
-            spdlog::info ( __VA_ARGS__ );     \
-            break;                            \
-        case ( ERROR ):                       \
-            spdlog::error ( __VA_ARGS__ );    \
-            break;                            \
-        case ( WARN ):                        \
-            spdlog::warn ( __VA_ARGS__ );     \
-            break;                            \
-        case ( CRITICAL ):                    \
-            spdlog::critical ( __VA_ARGS__ ); \
-            break;                            \
-        case ( DEBUG ):                       \
-            spdlog::debug ( __VA_ARGS__ );    \
-            break;                            \
-        default:                              \
-            break;                            \
-    }
+#define LOG( LEVEL, format, ... )                                                  \
+    spdlog::log ( static_cast<spdlog::level::level_enum> ( SPDLOG_LEVEL_##LEVEL ), \
+                  format,                                                          \
+                  ##__VA_ARGS__ );
 
 namespace hemiola
 {

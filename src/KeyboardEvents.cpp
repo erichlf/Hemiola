@@ -118,6 +118,7 @@ bool hemiola::KeyboardEvents::updateKeyState()
              && m_KeyReport.keys [2] != scanHex && m_KeyReport.keys [3] != scanHex
              && m_KeyReport.keys [4] != scanHex && m_KeyReport.keys [5] != scanHex ) {
             // add current key press to the list of key presses, and don't overwrite
+            // TODO: handle KEY_ERR_OVF
             for ( auto& code : m_KeyReport.keys ) {
                 if ( code == 0x00 ) {
                     code = scanHex;
