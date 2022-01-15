@@ -84,4 +84,4 @@ To run hemiola one simply can execute the following command on your rpi:
 sudo ./hemiola/build/hemiola
 ```
 
-Currently logging is output to `/var/log/hemiola.log`
+Currently logging is output to `/var/log/hemiola/hemiola.log`
