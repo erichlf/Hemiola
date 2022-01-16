@@ -25,6 +25,7 @@
 #include "Logger.h"
 #include "Utils.h"
 
+#include <fmt/core.h>
 #include <linux/input.h>
 
 #include <bitset>
@@ -42,27 +43,29 @@ hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable )
 hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable,
                                           std::shared_ptr<InputHID> device )
     : m_KeyReport {}
+    , m_KeyRep {}
     , m_KeyTable { std::move ( keyTable ) }
     , m_InputHID ( std::move ( device ) )
 {}
 
-void hemiola::KeyboardEvents::capture ( std::function<void ( KeyReport )> onEvent,
+void hemiola::KeyboardEvents::capture ( std::function<void ( KeyReport, std::string )> onEvent,
                                         std::function<void ( std::exception_ptr )> onError )
 {
     try {
-        while ( updateKeyState() ) {
-            onEvent ( m_KeyReport );  // send the scan code directly to the output
+        input_event event {};
+        while ( getEvent ( event ) ) {
+            updateKeyState ( event );           // process the captured event
+            onEvent ( m_KeyReport, m_KeyRep );  // send the scan code directly to the output
         }
     } catch ( ... ) {
-        LOG ( ERROR, "Input device closed unexpectedly" );
+        LOG ( ERROR, "An error occurred while reading keyboard event" );
         m_InputHID->close();
         onError ( std::current_exception() );
     }
 }
 
-bool hemiola::KeyboardEvents::updateKeyState()
+bool hemiola::KeyboardEvents::getEvent ( input_event& event ) const
 {
-    input_event event {};
     try {
         m_InputHID->read ( event );
     } catch ( ... ) {
@@ -75,19 +78,28 @@ bool hemiola::KeyboardEvents::updateKeyState()
           event.value,
           event.code );
 
+    return true;
+}
+
+void hemiola::KeyboardEvents::updateKeyState ( const input_event& event )
+{
+    // reset our key string
+    m_KeyRep.clear();
+
     if ( event.type != EV_KEY ) {
-        return updateKeyState();  // keyboard events are always of type EV_KEY
+        return;  // keyboard events are always of type EV_KEY
     }
 
     // the key code of the pressed key
     unsigned short scanCode = event.code;
 
     if ( event.value == EV_REPEAT ) {
-        return true;
+        return;
     } else if ( event.value == EV_BREAK ) {
         // we need to check if the key is a modifier first for this to work correctly
         if ( m_KeyTable->isModifier ( scanCode ) ) {  // turn off the current modifier
             m_KeyReport.modifiers &= ~m_KeyTable->modToHex ( scanCode );
+            m_KeyRep = fmt::format ( "</{}>", m_KeyTable->modKeys ( scanCode ) );
         } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
             const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
             // find the key and set to 0
@@ -99,18 +111,19 @@ bool hemiola::KeyboardEvents::updateKeyState()
             }
         }
 
-        return true;
+        return;
     }
 
     // this was not a key press so move on
     if ( event.value != EV_MAKE ) {
-        return updateKeyState();
+        return;
     }
 
     // we need to check if the key is a modifier first for this to work correctly
     if ( m_KeyTable->isModifier ( scanCode ) ) {
         LOG ( DEBUG, "MAKE Modifer: {} -> {}", scanCode, m_KeyTable->modToHex ( scanCode ) );
         m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
+        m_KeyRep = fmt::format ( "<{}>", m_KeyTable->modKeys ( scanCode ) );
     } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
         LOG ( DEBUG, "MAKE key: {} -> {}", scanCode, scanHex );
@@ -119,16 +132,19 @@ bool hemiola::KeyboardEvents::updateKeyState()
              && m_KeyReport.keys [4] != scanHex && m_KeyReport.keys [5] != scanHex ) {
             // add current key press to the list of key presses, and don't overwrite
             // TODO: handle KEY_ERR_OVF
+            bool overflow = true;
             for ( auto& code : m_KeyReport.keys ) {
                 if ( code == 0x00 ) {
                     code = scanHex;
+                    overflow = false;
                     break;
                 }
             }
+            if ( !overflow ) {
+                m_KeyRep = m_KeyTable->charKeys ( scanCode );
+            }
         }
     }
-
-    return true;
 }
 
 bool hemiola::operator== ( const KeyReport& lhs, const KeyReport& rhs )

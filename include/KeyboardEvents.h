@@ -72,20 +72,35 @@ namespace hemiola
          * @param onEvent function which will handle any key capture events
          * @param onError function which will handle any errors that arise
          */
-        void capture ( std::function<void ( KeyReport )> onEvent,
+        void capture ( std::function<void ( KeyReport, std::string )> onEvent,
                        std::function<void ( std::exception_ptr )> onError );
 
     private:
-        /*
-         * @brief function that translates key press into KeyState
-         * @return true if key event was processed false if connection seems to be lost
+        /*!
+         * @brief read key event
+         * @param event the key event captured from the keyboard
+         * @return true if key event an event was captured succesfully
+         * @throw IOError if an event was not able to be read from the keyboard
          */
-        bool updateKeyState();
+        bool getEvent ( input_event& event ) const;
+
+        /*!
+         * @brief function that translates key press into KeyState
+         * @param event the key event to process
+         * @post m_KeyReport and m_KeyRep will contain data corresponding to event
+         */
+        void updateKeyState ( const input_event& event );
 
         /*!
          * @brief the current key press
          */
         KeyReport m_KeyReport;
+
+        /*!
+         * @brief the string representation of the current key press/release
+         * @note non-modifers use a blank ("") representation for a release
+         */
+        std::string m_KeyRep;
 
         /*
          * @brief object containing the key map
