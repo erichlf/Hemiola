@@ -82,7 +82,8 @@ try {
         cv.notify_all();
     };
 
-    auto passThrough = [&output, &onError] ( KeyReport report ) {
+    auto onEvent = [&output, &onError] ( KeyReport report, std::string keyRep ) {
+        LOG ( DEBUG, keyRep );
         try {
             output->write ( report );
         } catch ( ... ) {
@@ -90,8 +91,8 @@ try {
         }
     };
 
-    auto captureThread = std::thread ( [&eventHandler, &passThrough, &onError] {
-        eventHandler.capture ( std::ref ( passThrough ), std::ref ( onError ) );
+    auto captureThread = std::thread ( [&eventHandler, &onEvent, &onError] {
+        eventHandler.capture ( std::ref ( onEvent ), std::ref ( onError ) );
         cv.notify_all();
     } );
 

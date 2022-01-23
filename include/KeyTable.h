@@ -45,21 +45,6 @@ namespace hemiola
         ~KeyTable() = default;
 
         /*!
-         * @brief Update our keymaps based on the system keymapping
-         * @post keymaps are updated to coincide with the system keymap
-         */
-        // void determineSystemKeymap();
-
-        /*!
-         * @brief convert a scan code to a character
-         * @param code the scan code from key press
-         * @param keyState the current state of the keypress
-         * @return character representation of key press or nullopt if no representation found
-         */
-        // std::optional<char_t> handleScanCode ( unsigned int code, const KeyState& keyState )
-        // const;
-
-        /*!
          * @brief convert a scan code (keyboard position) to the corresponding hex value
          * @param code the keyboard position to convert to hex
          * @return the hex value corresponding to the scan code
@@ -101,7 +86,6 @@ namespace hemiola
             return isCharKey ( code ) || isModifier ( code );
         }
 
-    private:
         /*!
          * @brief get the lower case string corresponding to a scan code
          * @param code the scan code from key press
@@ -116,6 +100,7 @@ namespace hemiola
          */
         std::string modKeys ( unsigned int code ) const;
 
+    private:
         std::unordered_map<int, std::string> m_CharKeys = {
             { KEY_A, "a" },  // Keyboard a and A
             { KEY_B, "b" },  // Keyboard b and B
