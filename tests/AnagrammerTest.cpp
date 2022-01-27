@@ -1,13 +1,13 @@
 /*
   MIT License
   Copyright (c) 2021 Erich L Foster
-  Permission is hereby granted, free of charge, to any person obtaining a copy
+  Pission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
+  copies of the Software, and to pit persons to whom the Software is
   furnished to do so, subject to the following conditions:
-  The above copyright notice and this permission notice shall be included in all
+  The above copyright notice and this pission notice shall be included in all
   copies or substantial portions of the Software.
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -17,7 +17,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include "Anagram.h"
+#include "Anagrammer.h"
 
 #include <gtest/gtest.h>
 
@@ -25,76 +25,76 @@
 #include <string>
 #include <vector>
 
-TEST ( AnagramTest, NoAnagramTest )
+TEST ( AnagrammerTest, NoAnagrammerTest )
 {
-    hemiola::Anagram anagram;
+    hemiola::Anagrammer anagrammer;
 
-    auto result { anagram.lookup ( "" ) };
+    auto result { anagrammer.lookup ( "" ) };
 
     EXPECT_EQ ( result.size(), 0 );
 }
 
-TEST ( AnagramTest, LowerCaseTest )
+TEST ( AnagrammerTest, LowerCaseTest )
 {
-    hemiola::Anagram anagram;
+    hemiola::Anagrammer anagrammer;
 
-    anagram.insert ( "cat" );
-    anagram.insert ( "act" );
+    anagrammer.insert ( "cat" );
+    anagrammer.insert ( "act" );
 
-    auto result = anagram.lookup ( "tac" );
+    auto result = anagrammer.lookup ( "tac" );
     EXPECT_EQ ( result.size(), 2 );
 }
 
-TEST ( AnagramTest, UpperCaseTest )
+TEST ( AnagrammerTest, UpperCaseTest )
 {
-    hemiola::Anagram anagram;
+    hemiola::Anagrammer anagrammer;
 
-    anagram.insert ( "Cat" );
-    anagram.insert ( "act" );
+    anagrammer.insert ( "Cat" );
+    anagrammer.insert ( "act" );
 
-    auto result = anagram.lookup ( "tac" );
+    auto result = anagrammer.lookup ( "tac" );
     EXPECT_EQ ( result.size(), 2 );
 }
 
-TEST ( AnagramTest, RepeatedLetterTest )
+TEST ( AnagrammerTest, RepeatedLetterTest )
 {
-    hemiola::Anagram anagram;
+    hemiola::Anagrammer anagrammer;
 
-    anagram.insert ( "aa" );
-    anagram.insert ( "a" );
+    anagrammer.insert ( "aa" );
+    anagrammer.insert ( "a" );
 
-    auto result = anagram.lookup ( "AA" );
+    auto result = anagrammer.lookup ( "AA" );
     EXPECT_EQ ( result.size(), 1 );
     EXPECT_EQ ( result [0], "aa" );
 
-    result = anagram.lookup ( "A" );
+    result = anagrammer.lookup ( "A" );
     EXPECT_EQ ( result.size(), 1 );
     EXPECT_EQ ( result [0], "a" );
 }
 
-TEST ( AnagramTest, SubwordTest )
+TEST ( AnagrammerTest, SubwordTest )
 {
-    hemiola::Anagram anagram;
+    hemiola::Anagrammer anagrammer;
 
-    anagram.insert ( "actor" );
-    anagram.insert ( "cat" );
+    anagrammer.insert ( "actor" );
+    anagrammer.insert ( "cat" );
 
-    auto result = anagram.lookup ( "act" );
+    auto result = anagrammer.lookup ( "act" );
     EXPECT_EQ ( result.size(), 1 );
     EXPECT_EQ ( result [0], "cat" );
 }
 
-TEST ( AnagramTest, NonEnglishCharactersTest )
+TEST ( AnagrammerTest, NonEnglishCharactersTest )
 {
-    hemiola::Anagram anagram;
+    hemiola::Anagrammer anagrammer;
 
-    anagram.insert ( "actor" );
-    anagram.insert ( "cät" );
+    anagrammer.insert ( "actor" );
+    anagrammer.insert ( "cät" );
 
-    auto result = anagram.lookup ( "act" );
+    auto result = anagrammer.lookup ( "act" );
     EXPECT_EQ ( result.size(), 0 );
 
-    result = anagram.lookup ( "äct" );
+    result = anagrammer.lookup ( "äct" );
     EXPECT_EQ ( result.size(), 1 );
     EXPECT_EQ ( result [0], "cät" );
 }

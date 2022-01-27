@@ -17,7 +17,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include "Anagram.h"
+#include "Anagrammer.h"
 
 #include "Logger.h"
 
@@ -76,7 +76,7 @@ namespace
     }
 }
 
-void hemiola::Anagram::insert ( const std::string& word )
+void hemiola::Anagrammer::insert ( const std::string& word )
 {
     // keys are strings that are sorted lexicographically
     const auto letters = sortToLower ( word );
@@ -88,7 +88,7 @@ void hemiola::Anagram::insert ( const std::string& word )
     }
 }
 
-std::vector<std::string> hemiola::Anagram::lookup ( std::string letters ) const
+std::vector<std::string> hemiola::Anagrammer::lookup ( std::string letters ) const
 {
     if ( letters.size() == 0 )
         return {};
