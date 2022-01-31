@@ -71,7 +71,7 @@ bool hemiola::KeyTable::isModifierPair ( const std::string& first, const std::st
     }
 
     // determine which type of modifier first is and set the match
-    std::string match{};
+    std::string match {};
     for ( auto el : m_ModKeys ) {
         if ( beginModKey ( el.first ) == first ) {
             match = endModKey ( el.first );
@@ -95,6 +95,31 @@ std::string hemiola::KeyTable::endModKey ( const unsigned int code ) const
 {
     auto key = modKeys ( code );
     return key.empty() ? key : fmt::format ( m_EndModifierFmt, key );
+}
+
+bool hemiola::KeyTable::isTypeModifier (
+    const std::string& key,
+    std::function<std::string ( const unsigned int )> predicate ) const
+{
+    for ( auto el : m_ModKeys ) {
+        if ( predicate ( el.first ) == key ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool hemiola::KeyTable::isBeginModifier ( const std::string& key ) const
+{
+    return isTypeModifier ( key,
+                            [this] ( const unsigned int code ) { return beginModKey ( code ); } );
+}
+
+bool hemiola::KeyTable::isEndModifier ( const std::string& key ) const
+{
+    return isTypeModifier ( key,
+                            [this] ( const unsigned int code ) { return endModKey ( code ); } );
 }
 
 uint8_t hemiola::KeyTable::scanToHex ( const unsigned int code ) const

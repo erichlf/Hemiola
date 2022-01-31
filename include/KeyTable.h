@@ -24,6 +24,7 @@
 #include <linux/input.h>
 
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -32,9 +33,6 @@
 
 namespace hemiola
 {
-    // forward declaration
-    struct KeyState;
-
     /*!
      * @brief class which contains the system key map
      */
@@ -67,7 +65,10 @@ namespace hemiola
          * @param code to check
          * @return true if the scan code is a modifier key
          */
-        bool isModifier ( const unsigned int code ) const { return ( m_ModiferHex.count ( code ) != 0 ); }
+        bool isModifier ( const unsigned int code ) const
+        {
+            return ( m_ModiferHex.count ( code ) != 0 );
+        }
 
         /*!
          * @brief determine if the string representation is a modifier key
@@ -80,8 +81,8 @@ namespace hemiola
          * @brief determine if two given modifiers are beginning and ending matches
          * @param first beginning or ending modifier to verify against
          * @param second beginning or ending modifiers to verify is the matching to first
-         * @return true if the modifiers are a beginning and ending pair. If either first or second are not
-         *         a modifier then this returns false
+         * @return true if the modifiers are a beginning and ending pair. If either first or second
+         * are not a modifier then this returns false
          */
         bool isModifierPair ( const std::string& first, const std::string& second ) const;
 
@@ -112,27 +113,54 @@ namespace hemiola
         /*!
          * @brief get the modifier key string corresponding to a scan code
          * @param code the scan code from key press
-         * @return string representing the the modifier for scan code or empty string if not a valid key code
+         * @return string representing the the modifier for scan code or empty string if not a valid
+         * key code
          */
         std::string modKeys ( const unsigned int code ) const;
 
         /*!
          * @brief get the beginning modifier string corresponding to a scan code
          * @param code the scan code from key press
-         * @return string representing the beginning modifier for a scan code or empty string if not a valid
-         *         key code
+         * @return string representing the beginning modifier for a scan code or empty string if not
+         * a valid key code
          */
         std::string beginModKey ( const unsigned int code ) const;
 
         /*!
          * @brief get the ending modifier string corresponding to a scan code
          * @param code the scan code from key press
-         * @return string representing the ending modifier for a scan code or empty string if not a valid
-         *         key code
+         * @return string representing the ending modifier for a scan code or empty string if not a
+         * valid key code
          */
         std::string endModKey ( const unsigned int code ) const;
 
+        /*!
+         * @brief check if the key is a begin modifier
+         * @param key The string representation to check if it is a begin modifier
+         * @return true if the representation is a begin modifier
+         */
+        bool isBeginModifier ( const std::string& key ) const;
+
+        /*!
+         * @brief check if the key is a end modifier
+         * @param key The string representation to check if it is a end modifier
+         * @return true if the representation is a end modifier
+         */
+        bool isEndModifier ( const std::string& key ) const;
+
     private:
+        /*!
+         * @brief check if the key is a modifier matching the predicate
+         * @param key The string representation to check if it is a modifier matching the predicate
+         * @param predicate The predicate for checking the modifier
+         * @return true if the modifier matches the predicate
+         */
+        bool isTypeModifier ( const std::string& key,
+                              std::function<std::string ( const unsigned int )> typePredicate ) const;
+
+        /*!
+         * @brief Character Keys
+         */
         std::unordered_map<int, std::string> m_CharKeys = {
             { KEY_A, "a" },  // Keyboard a and A
             { KEY_B, "b" },  // Keyboard b and B
