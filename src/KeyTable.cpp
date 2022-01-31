@@ -32,7 +32,7 @@
 
 using namespace hemiola;
 
-std::string hemiola::KeyTable::charKeys ( unsigned int code ) const
+std::string hemiola::KeyTable::charKeys ( const unsigned int code ) const
 {
     try {
         return m_CharKeys.at ( code );
@@ -42,7 +42,7 @@ std::string hemiola::KeyTable::charKeys ( unsigned int code ) const
     }
 }
 
-std::string hemiola::KeyTable::modKeys ( unsigned int code ) const
+std::string hemiola::KeyTable::modKeys ( const unsigned int code ) const
 {
     try {
         return m_ModKeys.at ( code );
@@ -52,7 +52,52 @@ std::string hemiola::KeyTable::modKeys ( unsigned int code ) const
     }
 }
 
-uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
+bool hemiola::KeyTable::isModifier ( const std::string& key ) const
+{
+    for ( auto modKey : m_ModKeys ) {
+        if ( ( beginModKey ( modKey.first ) == key ) || ( endModKey ( modKey.first ) == key ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool hemiola::KeyTable::isModifierPair ( const std::string& first, const std::string& second ) const
+{
+    // one of the keys is not a modifier so clearly there can't be a match
+    if ( !isModifier ( first ) || !isModifier ( second ) ) {
+        return false;
+    }
+
+    // determine which type of modifier first is and set the match
+    std::string match{};
+    for ( auto el : m_ModKeys ) {
+        if ( beginModKey ( el.first ) == first ) {
+            match = endModKey ( el.first );
+            break;
+        } else if ( endModKey ( el.first ) == first ) {
+            match = beginModKey ( el.first );
+            break;
+        }
+    }
+
+    return second == match;
+}
+
+std::string hemiola::KeyTable::beginModKey ( const unsigned int code ) const
+{
+    auto key = modKeys ( code );
+    return key.empty() ? key : fmt::format ( m_BeginModifierFmt, key );
+}
+
+std::string hemiola::KeyTable::endModKey ( const unsigned int code ) const
+{
+    auto key = modKeys ( code );
+    return key.empty() ? key : fmt::format ( m_EndModifierFmt, key );
+}
+
+uint8_t hemiola::KeyTable::scanToHex ( const unsigned int code ) const
 {
     try {
         return m_HexValues.at ( code );
@@ -62,7 +107,7 @@ uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
     }
 }
 
-uint8_t hemiola::KeyTable::modToHex ( unsigned int code ) const
+uint8_t hemiola::KeyTable::modToHex ( const unsigned int code ) const
 {
     try {
         return m_ModiferHex.at ( code );

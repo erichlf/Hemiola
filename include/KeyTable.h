@@ -51,7 +51,7 @@ namespace hemiola
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t scanToHex ( unsigned int code ) const;
+        uint8_t scanToHex ( const unsigned int code ) const;
 
         /*!
          * @brief convert a scan code (keyboard position) to the corresponding modifier hex value
@@ -60,28 +60,44 @@ namespace hemiola
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t modToHex ( unsigned int code ) const;
+        uint8_t modToHex ( const unsigned int code ) const;
 
         /*!
          * @brief determine if the scan code is a modifier key
          * @param code to check
          * @return true if the scan code is a modifier key
          */
-        bool isModifier ( unsigned int code ) const { return ( m_ModiferHex.count ( code ) != 0 ); }
+        bool isModifier ( const unsigned int code ) const { return ( m_ModiferHex.count ( code ) != 0 ); }
+
+        /*!
+         * @brief determine if the string representation is a modifier key
+         * @param string to check
+         * @return true if the scan code is a modifier key
+         */
+        bool isModifier ( const std::string& key ) const;
+
+        /*!
+         * @brief determine if two given modifiers are beginning and ending matches
+         * @param first beginning or ending modifier to verify against
+         * @param second beginning or ending modifiers to verify is the matching to first
+         * @return true if the modifiers are a beginning and ending pair. If either first or second are not
+         *         a modifier then this returns false
+         */
+        bool isModifierPair ( const std::string& first, const std::string& second ) const;
 
         /*!
          * @brief determine if the scan code is a character key
          * @param code to check
          * @return true if the scan code is a character key
          */
-        bool isCharKey ( unsigned int code ) const { return m_HexValues.count ( code ) != 0; }
+        bool isCharKey ( const unsigned int code ) const { return m_HexValues.count ( code ) != 0; }
 
         /*!
          * @brief determine if the scan code is a valid key in our keytable
          * @param code to check
          * @return true if the scan code is a valid key
          */
-        bool isKeyValid ( unsigned int code ) const
+        bool isKeyValid ( const unsigned int code ) const
         {
             return isCharKey ( code ) || isModifier ( code );
         }
@@ -96,9 +112,25 @@ namespace hemiola
         /*!
          * @brief get the modifier key string corresponding to a scan code
          * @param code the scan code from key press
-         * @return function key representing the scan code or empty string if not a valid key code
+         * @return string representing the the modifier for scan code or empty string if not a valid key code
          */
-        std::string modKeys ( unsigned int code ) const;
+        std::string modKeys ( const unsigned int code ) const;
+
+        /*!
+         * @brief get the beginning modifier string corresponding to a scan code
+         * @param code the scan code from key press
+         * @return string representing the beginning modifier for a scan code or empty string if not a valid
+         *         key code
+         */
+        std::string beginModKey ( const unsigned int code ) const;
+
+        /*!
+         * @brief get the ending modifier string corresponding to a scan code
+         * @param code the scan code from key press
+         * @return string representing the ending modifier for a scan code or empty string if not a valid
+         *         key code
+         */
+        std::string endModKey ( const unsigned int code ) const;
 
     private:
         std::unordered_map<int, std::string> m_CharKeys = {
@@ -449,6 +481,9 @@ namespace hemiola
         };
 
         unsigned short N_KEYS_DEFINED = 106;  // sum of all 'c' and 'f' chars in charOrFunc[]
+
+        const std::string m_BeginModifierFmt = "<{}>";
+        const std::string m_EndModifierFmt = "</{}>";
     };
 
 }  // namespace hemiola
