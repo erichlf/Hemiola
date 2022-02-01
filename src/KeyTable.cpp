@@ -54,8 +54,8 @@ std::string hemiola::KeyTable::modKeys ( const unsigned int code ) const
 
 bool hemiola::KeyTable::isModifier ( const std::string& key ) const
 {
-    for ( auto modKey : m_ModKeys ) {
-        if ( ( beginModKey ( modKey.first ) == key ) || ( endModKey ( modKey.first ) == key ) ) {
+    for ( const auto [modKey, modString] : m_ModKeys ) {
+        if ( ( beginModKey ( modKey ) == key ) || ( endModKey ( modKey ) == key ) ) {
             return true;
         }
     }
@@ -72,12 +72,12 @@ bool hemiola::KeyTable::isModifierPair ( const std::string& first, const std::st
 
     // determine which type of modifier first is and set the match
     std::string match {};
-    for ( auto el : m_ModKeys ) {
-        if ( beginModKey ( el.first ) == first ) {
-            match = endModKey ( el.first );
+    for ( const auto [modKey, modString] : m_ModKeys ) {
+        if ( beginModKey ( modKey ) == first ) {
+            match = endModKey ( modKey );
             break;
-        } else if ( endModKey ( el.first ) == first ) {
-            match = beginModKey ( el.first );
+        } else if ( endModKey ( modKey ) == first ) {
+            match = beginModKey ( modKey );
             break;
         }
     }
@@ -101,8 +101,8 @@ bool hemiola::KeyTable::isTypeModifier (
     const std::string& key,
     std::function<std::string ( const unsigned int )> predicate ) const
 {
-    for ( auto el : m_ModKeys ) {
-        if ( predicate ( el.first ) == key ) {
+    for ( const auto [modKey, modString] : m_ModKeys ) {
+        if ( predicate ( modKey ) == key ) {
             return true;
         }
     }
