@@ -26,30 +26,42 @@
 using namespace hemiola;
 
 hemiola::Hemiola::Hemiola ( std::shared_ptr<KeyTable> keyTable )
-    : m_Captured{}
-    , m_Anagrammer{}
+    : m_Captured {}
+    , m_Anagrammer {}
     , m_KeyTable { std::move ( keyTable ) }
     , m_DontCapture { false }
 {}
 
 void hemiola::Hemiola::addKey ( const std::string& key )
 {
-    // not capturing or no key sent so nothing to do
-    if ( m_DontCapture || key.empty() ) {
+    LOG ( DEBUG, "KEY: {}", key );
+    if ( key.empty() ) {
         return;
     }
 
+    auto notShiftOrAltGr = [this] ( const auto key ) {
+        return ( key != m_KeyTable->beginModKey ( KEY_RIGHTALT )
+                 && key != m_KeyTable->beginModKey ( KEY_RIGHTSHIFT )
+                 && key != m_KeyTable->beginModKey ( KEY_LEFTSHIFT )
+                 && key != m_KeyTable->endModKey ( KEY_RIGHTALT )
+                 && key != m_KeyTable->endModKey ( KEY_RIGHTSHIFT )
+                 && key != m_KeyTable->endModKey ( KEY_LEFTSHIFT ) );
+    };
+
     // key is for the beginning of a non-capturable modifier sequence
-    if ( m_KeyTable->isModifier ( key ) && key != m_KeyTable->beginModKey ( KEY_RIGHTALT )
-         && key != m_KeyTable->beginModKey ( KEY_RIGHTSHIFT )
-         && key != m_KeyTable->beginModKey ( KEY_LEFTSHIFT ) ) {
+    if ( m_KeyTable->isBeginModifier ( key ) && notShiftOrAltGr ( key ) ) {
         m_DontCapture = true;
+        LOG ( DEBUG, "DONT CAPTURE: {}, KEY: {}", m_DontCapture, key );
         return;
-    } else if ( m_KeyTable->isModifier ( key ) && key != m_KeyTable->endModKey ( KEY_RIGHTALT )
-                && key != m_KeyTable->endModKey ( KEY_RIGHTSHIFT )
-                && key != m_KeyTable->endModKey ( KEY_LEFTSHIFT ) ) {
+    } else if ( m_KeyTable->isEndModifier ( key ) && notShiftOrAltGr ( key ) ) {
         // key is for the end of a non-capturable modifier sequence
         m_DontCapture = false;
+        LOG ( DEBUG, "DONT CAPTURE: {}, KEY: {}", m_DontCapture, key );
+        return;
+    }
+
+    // not capturing or no key sent so nothing to do
+    if ( m_DontCapture ) {
         return;
     }
 
@@ -77,18 +89,20 @@ void hemiola::Hemiola::deleteKey()
     // get the largest sequence such that the begin and end reverse iterators are the same type of
     // modifier
     using riter = decltype ( m_Captured.rbegin() );
-    std::function<void(riter, riter)> surroundingModifiers;
-    surroundingModifiers = [this, &surroundingModifiers] ( riter begin, riter end ) {
-        if ( m_KeyTable->isModifierPair ( *std::next ( begin, -1 ), *std::next ( end ) ) ) {
+    std::function<void ( riter&, riter& )> surroundingModifiers;
+    surroundingModifiers = [this, &surroundingModifiers] ( riter& begin, riter& end ) {
+        auto newBegin = std::next ( begin, -1 );
+        auto newEnd = std::next ( end );
+        if ( m_KeyTable->isModifierPair ( *newBegin, *newEnd ) ) {
             // advance our iterators and then try to expand
-            std::advance ( begin, -1 );
-            std::advance ( end, 1 );
+            begin = newBegin;
+            end = newEnd;
             surroundingModifiers ( begin, end );
         }
     };
 
     // find the last key capture that isn't a modifier
-    auto begin = std::find_if ( m_Captured.rbegin() , m_Captured.rend(), notModifier );
+    auto begin = std::find_if ( m_Captured.rbegin(), m_Captured.rend(), notModifier );
     auto end = begin;
 
     // no key found that isn't a modifier
@@ -101,5 +115,5 @@ void hemiola::Hemiola::deleteKey()
     surroundingModifiers ( begin, end );
 
     // now actually remove the key
-    m_Captured.erase ( end.base(), begin.base() );
+    m_Captured.erase ( std::next ( end ).base(), begin.base() );
 }

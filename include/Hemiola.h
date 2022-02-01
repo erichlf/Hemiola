@@ -43,10 +43,17 @@ namespace hemiola
         /*!
          * @brief add the key press to the captured string
          * @param key String representation of key press
-         * @post key press is added to captured keys, and if a word boundary is detected the captured string
-         *       word is processed for anagrams
+         * @post key press is added to captured keys, and if a word boundary is detected the
+         * captured string word is processed for anagrams
          */
         void addKey ( const std::string& key );
+
+        /*!
+         * @brief return a vector of the currently captured keys
+         * @return vector of captured keys
+         */
+        const std::vector<std::string>& captured() const { return m_Captured; };
+
     private:
         /*!
          * @brief remove the most recent key in m_Captured, including any surrounding modifiers

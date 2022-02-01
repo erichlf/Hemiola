@@ -155,8 +155,9 @@ namespace hemiola
          * @param predicate The predicate for checking the modifier
          * @return true if the modifier matches the predicate
          */
-        bool isTypeModifier ( const std::string& key,
-                              std::function<std::string ( const unsigned int )> typePredicate ) const;
+        bool isTypeModifier (
+            const std::string& key,
+            std::function<std::string ( const unsigned int )> typePredicate ) const;
 
         /*!
          * @brief Character Keys
