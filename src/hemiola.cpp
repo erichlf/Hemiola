@@ -17,6 +17,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include "Hemiola.h"
+
 #include "Exceptions.h"
 #include "InputHID.h"
 #include "KeyTable.h"
@@ -68,6 +70,7 @@ try {
     auto input = std::make_shared<InputHID>();
     auto output = std::make_shared<OutputHID>();
     auto keys = std::make_shared<KeyTable>();
+    Hemiola hemiola ( keys );
 
     // open devices so they can be used
     input->open();
@@ -82,10 +85,11 @@ try {
         cv.notify_all();
     };
 
-    auto onEvent = [&output, &onError] ( KeyReport report, std::string keyRep ) {
+    auto onEvent = [&output, &hemiola, &onError] ( KeyReport report, std::string keyRep ) {
         LOG ( DEBUG, keyRep );
         try {
             output->write ( report );
+            hemiola.addKey ( keyRep );
         } catch ( ... ) {
             onError ( std::current_exception() );
         }
