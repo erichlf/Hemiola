@@ -21,6 +21,8 @@
 
 #include "Logger.h"
 
+#include <fmt/ranges.h>
+
 #include <functional>
 
 using namespace hemiola;
@@ -67,7 +69,7 @@ void hemiola::Hemiola::addKey ( const std::string& key )
 
     if ( key == m_KeyTable->charKeys ( KEY_SPACE ) || key == m_KeyTable->charKeys ( KEY_ENTER ) ) {
         // TODO: use Anagrammer to process the string capture
-        LOG ( DEBUG, "Word Boundary found with word {}" );
+        LOG ( DEBUG, "Word Boundary found with word {}", fmt::join ( m_Captured, "" ) );
         m_Captured.clear();
         return;
     }

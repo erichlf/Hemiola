@@ -40,7 +40,7 @@ namespace
     }
 }
 
-TEST ( KeyTableTest, addKeyTest )
+TEST ( HemiolaTest, addKeyTest )
 {
     using namespace std::string_literals;
 
@@ -70,7 +70,7 @@ TEST ( KeyTableTest, addKeyTest )
     EXPECT_EQ ( join ( hemiola.captured() ), "a"s );
 }
 
-TEST ( KeyTableTest, backspaceKeyTest )
+TEST ( HemiolaTest, backspaceKeyTest )
 {
     using namespace std::string_literals;
 
