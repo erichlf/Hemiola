@@ -32,7 +32,7 @@
 
 using namespace hemiola;
 
-std::string hemiola::KeyTable::charKeys ( unsigned int code ) const
+std::string hemiola::KeyTable::charKeys ( const unsigned int code ) const
 {
     try {
         return m_CharKeys.at ( code );
@@ -42,7 +42,7 @@ std::string hemiola::KeyTable::charKeys ( unsigned int code ) const
     }
 }
 
-std::string hemiola::KeyTable::modKeys ( unsigned int code ) const
+std::string hemiola::KeyTable::modKeys ( const unsigned int code ) const
 {
     try {
         return m_ModKeys.at ( code );
@@ -52,7 +52,77 @@ std::string hemiola::KeyTable::modKeys ( unsigned int code ) const
     }
 }
 
-uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
+bool hemiola::KeyTable::isModifier ( const std::string& key ) const
+{
+    for ( const auto [modKey, modString] : m_ModKeys ) {
+        if ( ( beginModKey ( modKey ) == key ) || ( endModKey ( modKey ) == key ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool hemiola::KeyTable::isModifierPair ( const std::string& first, const std::string& second ) const
+{
+    // one of the keys is not a modifier so clearly there can't be a match
+    if ( !isModifier ( first ) || !isModifier ( second ) ) {
+        return false;
+    }
+
+    // determine which type of modifier first is and set the match
+    std::string match {};
+    for ( const auto [modKey, modString] : m_ModKeys ) {
+        if ( beginModKey ( modKey ) == first ) {
+            match = endModKey ( modKey );
+            break;
+        } else if ( endModKey ( modKey ) == first ) {
+            match = beginModKey ( modKey );
+            break;
+        }
+    }
+
+    return second == match;
+}
+
+std::string hemiola::KeyTable::beginModKey ( const unsigned int code ) const
+{
+    auto key = modKeys ( code );
+    return key.empty() ? key : fmt::format ( m_BeginModifierFmt, key );
+}
+
+std::string hemiola::KeyTable::endModKey ( const unsigned int code ) const
+{
+    auto key = modKeys ( code );
+    return key.empty() ? key : fmt::format ( m_EndModifierFmt, key );
+}
+
+bool hemiola::KeyTable::isTypeModifier (
+    const std::string& key,
+    std::function<std::string ( const unsigned int )> predicate ) const
+{
+    for ( const auto [modKey, modString] : m_ModKeys ) {
+        if ( predicate ( modKey ) == key ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool hemiola::KeyTable::isBeginModifier ( const std::string& key ) const
+{
+    return isTypeModifier ( key,
+                            [this] ( const unsigned int code ) { return beginModKey ( code ); } );
+}
+
+bool hemiola::KeyTable::isEndModifier ( const std::string& key ) const
+{
+    return isTypeModifier ( key,
+                            [this] ( const unsigned int code ) { return endModKey ( code ); } );
+}
+
+uint8_t hemiola::KeyTable::scanToHex ( const unsigned int code ) const
 {
     try {
         return m_HexValues.at ( code );
@@ -62,7 +132,7 @@ uint8_t hemiola::KeyTable::scanToHex ( unsigned int code ) const
     }
 }
 
-uint8_t hemiola::KeyTable::modToHex ( unsigned int code ) const
+uint8_t hemiola::KeyTable::modToHex ( const unsigned int code ) const
 {
     try {
         return m_ModiferHex.at ( code );

@@ -13,7 +13,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 ##################  create a hemiola library ##################
 add_library(hemiolalib
     SHARED
-    src/Anagram.cpp
+    src/Anagrammer.cpp
+    src/Hemiola.cpp
     src/HID.cpp
     src/InputHID.cpp
     src/KeyTable.cpp

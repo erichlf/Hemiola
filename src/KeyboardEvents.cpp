@@ -25,7 +25,6 @@
 #include "Logger.h"
 #include "Utils.h"
 
-#include <fmt/core.h>
 #include <linux/input.h>
 
 #include <bitset>
@@ -99,7 +98,7 @@ void hemiola::KeyboardEvents::updateKeyState ( const input_event& event )
         // we need to check if the key is a modifier first for this to work correctly
         if ( m_KeyTable->isModifier ( scanCode ) ) {  // turn off the current modifier
             m_KeyReport.modifiers &= ~m_KeyTable->modToHex ( scanCode );
-            m_KeyRep = fmt::format ( "</{}>", m_KeyTable->modKeys ( scanCode ) );
+            m_KeyRep = m_KeyTable->endModKey ( scanCode );
         } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
             const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
             // find the key and set to 0
@@ -123,7 +122,7 @@ void hemiola::KeyboardEvents::updateKeyState ( const input_event& event )
     if ( m_KeyTable->isModifier ( scanCode ) ) {
         LOG ( DEBUG, "MAKE Modifer: {} -> {}", scanCode, m_KeyTable->modToHex ( scanCode ) );
         m_KeyReport.modifiers |= m_KeyTable->modToHex ( scanCode );
-        m_KeyRep = fmt::format ( "<{}>", m_KeyTable->modKeys ( scanCode ) );
+        m_KeyRep = m_KeyTable->beginModKey ( scanCode );
     } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
         LOG ( DEBUG, "MAKE key: {} -> {}", scanCode, scanHex );

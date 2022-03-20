@@ -28,15 +28,15 @@ namespace hemiola
     /*!
      * @brief class for determining the anagrams of a given string
      */
-    class Anagram
+    class Anagrammer
     {
     public:
-        Anagram() = default;
-        Anagram ( const Anagram& ) = delete;
-        Anagram ( Anagram&& ) = delete;
-        Anagram& operator= ( const Anagram& ) = delete;
-        Anagram& operator= ( Anagram&& ) = delete;
-        ~Anagram() = default;
+        Anagrammer() = default;
+        Anagrammer ( const Anagrammer& ) = delete;
+        Anagrammer ( Anagrammer&& ) = delete;
+        Anagrammer& operator= ( const Anagrammer& ) = delete;
+        Anagrammer& operator= ( Anagrammer&& ) = delete;
+        ~Anagrammer() = default;
 
         /*!
          * @brief insert word into data structure
