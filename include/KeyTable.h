@@ -90,9 +90,9 @@ namespace hemiola
          * @param code to check
          * @return true if the scan code is a character key
          */
-        inline bool isCharKey ( const uint8_t code ) const
+        inline bool isCharKey ( const unsigned int key ) const
         {
-            return m_HexValues.count ( code ) > 0;
+            return m_CharKeys.count ( key ) > 0;
         }
 
         /*!
@@ -100,9 +100,9 @@ namespace hemiola
          * @param code to check
          * @return true if the scan code is a valid key
          */
-        inline bool isKeyValid ( const uint8_t code ) const
+        inline bool isKeyValid ( const unsigned int key ) const
         {
-            return isCharKey ( code ) || isModifier ( code );
+            return m_HexValues.count ( key ) > 0 || isScanModifier ( key );
         }
 
         /*!
@@ -110,7 +110,7 @@ namespace hemiola
          * @param code the scan code from key press
          * @return string representing the scan code or empty string if not a valid key code
          */
-        std::string charKeys ( const unsigned int code ) const;
+        std::string charKeys ( const unsigned int key ) const;
 
         /*!
          * @brief get the modifier key string corresponding to a scan code
@@ -118,7 +118,7 @@ namespace hemiola
          * @return string representing the the modifier for scan code or empty string if not a valid
          * key code
          */
-        std::string modKeys ( const unsigned int code ) const;
+        std::string modKeys ( const unsigned int key ) const;
 
         /*!
          * @brief get the beginning modifier string corresponding to a scan code

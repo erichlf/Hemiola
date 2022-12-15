@@ -57,7 +57,7 @@ set_target_properties(hemiola
     CXX_STANDARD 17
     )
 target_compile_options(hemiola PRIVATE
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wno-psabi>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wconversion -Wno-psabi>
     )
 
 find_package(GTest 1.8)

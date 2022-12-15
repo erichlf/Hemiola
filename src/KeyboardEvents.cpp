@@ -122,12 +122,8 @@ void hemiola::KeyboardEvents::updateKeyState ( const input_event& event )
     } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
         LOG ( DEBUG, "MAKE key: {} -> {}", scanCode, scanHex );
-        if ( m_KeyReport.keys [0] != scanHex && m_KeyReport.keys [1] != scanHex
-             && m_KeyReport.keys [2] != scanHex && m_KeyReport.keys [3] != scanHex
-             && m_KeyReport.keys [4] != scanHex && m_KeyReport.keys [5] != scanHex ) {
-            if ( m_KeyReport.setKey ( scanHex ) ) {
-                m_KeyRep = scanCode;
-            }
+        if ( !m_KeyReport.setKey ( scanHex ) ) {
+            m_KeyRep = scanCode;
         }
     }
 }

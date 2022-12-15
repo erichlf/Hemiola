@@ -1,3 +1,4 @@
+chord_threshold_ms: 100
 dup: "="
 plural: ";"
 past: ","
@@ -104,6 +105,7 @@ chords:
   hear: hea
   hello: helo
   help: hel
+  hemiola: hem
   her: hr
   here: he + dup
   high: hig

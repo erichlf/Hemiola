@@ -44,6 +44,7 @@ namespace hemiola
 
         /*!
          * @brief Add key to the key report
+         * @returns true if the key was added to the report and false otherwise
          */
         bool setKey ( const uint8_t scanHex )
         {
@@ -51,7 +52,11 @@ namespace hemiola
             // TODO: handle KEY_ERR_OVF
             bool overflow = true;
             for ( auto& code : keys ) {
-                if ( code == 0x00 ) {
+                // key was already added to report
+                if ( code == scanHex ) {
+                    overflow = false;
+                    break;
+                } else if ( code == 0x00 ) {
                     code = scanHex;
                     overflow = false;
                     break;

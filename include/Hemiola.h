@@ -48,7 +48,7 @@ namespace hemiola
         Hemiola ( Hemiola&& ) = delete;
         Hemiola& operator= ( const Hemiola& ) = delete;
         Hemiola& operator= ( Hemiola&& ) = delete;
-        ~Hemiola() = default;
+        ~Hemiola();
 
         /*!
          * @brief add the key press to the captured string
@@ -77,7 +77,7 @@ namespace hemiola
          * @brief remove the most recent key in m_Captured, including any surrounding modifiers
          * @post the most recent key and any surrounding modifiers are removed from m_Captured
          */
-        // void deleteKey();
+        void deleteKey();
 
         /*!
          * @brief the currently captured text

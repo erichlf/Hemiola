@@ -39,6 +39,11 @@ hemiola::Hemiola::Hemiola ( std::shared_ptr<KeyTable> keyTable,
     , m_TimeThreshold { 300 }
 {}
 
+hemiola::Hemiola::~Hemiola()
+{
+    m_TimerThread.join();
+}
+
 void hemiola::Hemiola::addKey ( const unsigned int key )
 {
     LOG ( DEBUG, "KEY: {}", key );
@@ -81,54 +86,13 @@ void hemiola::Hemiola::addKey ( const unsigned int key )
     }
 
     if ( key == KEY_BACKSPACE ) {
-        // deleteKey();
+        deleteKey();
         return;
     }
 
     std::lock_guard<std::mutex> lock ( m_Mutex );
     m_Captured [key] = std::chrono::steady_clock::now();
 }
-
-// void hemiola::Hemiola::deleteKey()
-// {
-//     // predicate for checking if a key is not a modifier
-//     auto notModifier
-//         = [this] ( const unsigned int key ) { return !m_KeyTable->isModifier ( key ); };
-
-//     // get the largest sequence such that the begin and end reverse iterators are the same type
-//     of
-//     // modifier
-//     using riter = decltype ( m_Captured.rbegin() );
-//     std::function<void ( riter&, riter& )> surroundingModifiers;
-//     surroundingModifiers = [this, &surroundingModifiers] ( riter& begin, riter& end ) {
-//         auto newBegin = std::next ( begin, -1 );
-//         auto newEnd = std::next ( end );
-//         if ( m_KeyTable->isModifier ( *newBegin ) && m_KeyTable->isModifier ( *newEnd )
-//              && *newBegin == *newEnd ) {
-//             // advance our iterators and then try to expand
-//             begin = newBegin;
-//             end = newEnd;
-//             surroundingModifiers ( begin, end );
-//         }
-//     };
-
-//     // find the last key capture that isn't a modifier
-//     auto begin = std::find_if ( m_Captured.rbegin(), m_Captured.rend(), notModifier );
-//     auto end = begin;
-
-//     // no key found that isn't a modifier
-//     if ( begin == m_Captured.rend() ) {
-//         return;
-//     }
-
-//     // expand to remove all surrounding modifiers and stop expanding once we have no more
-//     modifier
-//     // pairs
-//     surroundingModifiers ( begin, end );
-
-//     // now actually remove the key
-//     m_Captured.erase ( std::next ( end ).base(), begin.base() );
-// }
 
 void hemiola::Hemiola::run()
 {
@@ -164,4 +128,27 @@ void hemiola::Hemiola::run()
             std::this_thread::sleep_for ( std::chrono::milliseconds ( 10 ) );
         }
     } );
+}
+
+void hemiola::Hemiola::deleteKey()
+{
+  // we should delete the most recent key that is not a modifier
+  unsigned int deleteKey = KEY_RESERVED;
+  TimePoint maxTime{};
+  for ( const auto& [key, value] : m_Captured ) {
+    // skip over modifers
+    if ( m_KeyTable->isModifier ( key ) ) {
+      continue;
+    }
+    if ( maxTime < value ) {
+      deleteKey = key;
+      maxTime = value;
+    }
+  }
+
+  if ( deleteKey == KEY_RESERVED ) {
+    return;
+  }
+
+  m_Captured.erase ( deleteKey );
 }
