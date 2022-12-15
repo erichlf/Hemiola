@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Pission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -18,6 +18,9 @@
   SOFTWARE.
 */
 #include "Hemiola.h"
+#include "KeyChords.h"
+#include "KeyTable.h"
+#include "OutputHID.h"
 
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -30,43 +33,64 @@ namespace
 {
     /*!
      * @brief Join the elements of a vector into a string
-     * @param vs Vector containing elements to be joing
-     * param sep The separator used to join the elements of the vector
-     * @return The vector joined as a string with each element seperated by a seperated
+     * @param cap_map A map containing values to be joined
+     * @return The values of the map joined as a string
      */
-    std::string join ( std::vector<std::string> vs, std::string sep = "" )
+    std::string join ( std::unordered_map<unsigned int, hemiola::Hemiola::TimePoint> cap_map )
     {
-        return fmt::format ( "{}", fmt::join ( vs, sep ) );
+        hemiola::KeyTable keyTable;
+        std::string joined {};
+        for ( const auto & [key, value] : cap_map ) {
+            joined += keyTable.charKeys ( key );
+        }
+
+        return joined;
     }
 }
+
+class TestOutputHID : public hemiola::OutputHID
+{
+public:
+    TestOutputHID() {};
+    ~TestOutputHID() = default;
+
+    void open() override
+    { /* no opt */
+    }
+    void write ( const hemiola::KeyReport& /*report*/ ) const
+    { /* no opt */
+    }
+};
 
 TEST ( HemiolaTest, addKeyTest )
 {
     using namespace std::string_literals;
 
     auto keyTable { std::make_shared<hemiola::KeyTable>() };
+    auto keyChords { std::make_shared<hemiola::KeyChords> ( keyTable ) };
+    auto output { std::make_shared<TestOutputHID>() };
 
-    hemiola::Hemiola hemiola ( keyTable );
+    hemiola::Hemiola hemiola ( keyTable, keyChords, output );
 
     EXPECT_EQ ( hemiola.captured().empty(), true );
 
-    hemiola.addKey ( keyTable->charKeys ( KEY_H ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_E ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_M ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_I ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_O ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_L ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_A ) );
+    hemiola.addKey ( KEY_H );
+    hemiola.addKey ( KEY_E );
+    hemiola.addKey ( KEY_M );
+    hemiola.addKey ( KEY_I );
+    hemiola.addKey ( KEY_O );
+    hemiola.addKey ( KEY_L );
+    hemiola.addKey ( KEY_A );
     EXPECT_EQ ( join ( hemiola.captured() ), "hemiola"s );
-    hemiola.addKey ( keyTable->charKeys ( KEY_SPACE ) );
+    hemiola.addKey ( KEY_SPACE );
     EXPECT_EQ ( join ( hemiola.captured() ), ""s );
 
-    hemiola.addKey ( keyTable->beginModKey ( KEY_RIGHTCTRL ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_C ) );
-    hemiola.addKey ( keyTable->endModKey ( KEY_RIGHTCTRL ) );
+    hemiola.addKey ( KEY_RIGHTCTRL );
+    hemiola.addKey ( KEY_C );
+    hemiola.addKey ( KEY_RIGHTCTRL );
     EXPECT_EQ ( join ( hemiola.captured() ), ""s );
 
-    hemiola.addKey ( keyTable->charKeys ( KEY_A ) );
+    hemiola.addKey ( KEY_A );
     EXPECT_EQ ( join ( hemiola.captured() ), "a"s );
 }
 
@@ -75,33 +99,35 @@ TEST ( HemiolaTest, backspaceKeyTest )
     using namespace std::string_literals;
 
     auto keyTable { std::make_shared<hemiola::KeyTable>() };
+    auto keyChords { std::make_shared<hemiola::KeyChords> ( keyTable ) };
+    auto output { std::make_shared<TestOutputHID>() };
 
-    hemiola::Hemiola hemiola ( keyTable );
+    hemiola::Hemiola hemiola ( keyTable, keyChords, output );
 
-    hemiola.addKey ( keyTable->beginModKey ( KEY_RIGHTSHIFT ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_A ) );
-    hemiola.addKey ( keyTable->endModKey ( KEY_RIGHTSHIFT ) );
-    EXPECT_EQ ( join ( hemiola.captured() ), "<RSHIFT>a</RSHIFT>"s );
+    hemiola.addKey ( KEY_RIGHTSHIFT );
+    hemiola.addKey ( KEY_A );
+    hemiola.addKey ( KEY_RIGHTSHIFT );
+    EXPECT_EQ ( join ( hemiola.captured() ), "a"s );
 
-    hemiola.addKey ( keyTable->charKeys ( KEY_BACKSPACE ) );
+    hemiola.addKey ( KEY_BACKSPACE );
     EXPECT_EQ ( join ( hemiola.captured() ), ""s );
 
-    hemiola.addKey ( keyTable->beginModKey ( KEY_RIGHTSHIFT ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_A ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_B ) );
-    hemiola.addKey ( keyTable->endModKey ( KEY_RIGHTSHIFT ) );
-    EXPECT_EQ ( join ( hemiola.captured() ), "<RSHIFT>ab</RSHIFT>"s );
+    hemiola.addKey ( KEY_RIGHTSHIFT );
+    hemiola.addKey ( KEY_A );
+    hemiola.addKey ( KEY_B );
+    hemiola.addKey (  KEY_RIGHTSHIFT );
+    EXPECT_EQ ( join ( hemiola.captured() ), "ab"s );
 
-    hemiola.addKey ( keyTable->charKeys ( KEY_BACKSPACE ) );
-    EXPECT_EQ ( join ( hemiola.captured() ), "<RSHIFT>a</RSHIFT>"s );
+    hemiola.addKey ( KEY_BACKSPACE );
+    EXPECT_EQ ( join ( hemiola.captured() ), "a"s );
 
-    hemiola.addKey ( keyTable->beginModKey ( KEY_RIGHTSHIFT ) );
-    hemiola.addKey ( keyTable->beginModKey ( KEY_RIGHTALT ) );
-    hemiola.addKey ( keyTable->charKeys ( KEY_A ) );
-    hemiola.addKey ( keyTable->endModKey ( KEY_RIGHTALT ) );
-    hemiola.addKey ( keyTable->endModKey ( KEY_RIGHTSHIFT ) );
-    EXPECT_EQ ( join ( hemiola.captured() ), "<RSHIFT>a</RSHIFT><RSHIFT><RALT>a</RALT></RSHIFT>"s );
+    hemiola.addKey (  KEY_RIGHTSHIFT );
+    hemiola.addKey (  KEY_RIGHTALT );
+    hemiola.addKey ( KEY_A );
+    hemiola.addKey (  KEY_RIGHTALT );
+    hemiola.addKey (  KEY_RIGHTSHIFT );
+    EXPECT_EQ ( join ( hemiola.captured() ), "a"s );
 
-    hemiola.addKey ( keyTable->charKeys ( KEY_BACKSPACE ) );
-    EXPECT_EQ ( join ( hemiola.captured() ), "<RSHIFT>a</RSHIFT>"s );
+    hemiola.addKey ( KEY_BACKSPACE );
+    EXPECT_EQ ( join ( hemiola.captured() ), "a"s );
 }

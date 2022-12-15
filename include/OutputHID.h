@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -57,6 +57,6 @@ namespace hemiola
          * @throw IoException if we are unable to write to device
          * @assumption device has been opened for writing
          */
-        void write ( const KeyReport& report ) const;
+        virtual void write ( const KeyReport& report ) const;
     };
 }  // namespace hemiola

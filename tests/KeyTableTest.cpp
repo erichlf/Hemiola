@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Pission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -45,41 +45,11 @@ TEST ( KeyTableTest, isModifierTest )
 {
     hemiola::KeyTable keyTable;
 
-    EXPECT_EQ ( keyTable.isModifier ( "" ), false );
+    EXPECT_EQ ( keyTable.isModifier ( KEY_RESERVED ), false );
+
     EXPECT_EQ ( keyTable.isModifier ( KEY_LEFTCTRL ), true );
-    EXPECT_EQ ( keyTable.isModifier ( "<RCTRL>" ), true );
-    EXPECT_EQ ( keyTable.isModifier ( "</RSHIFT>" ), true );
+    EXPECT_EQ ( keyTable.isModifier ( KEY_RIGHTCTRL ), true );
+    EXPECT_EQ ( keyTable.isModifier ( KEY_RIGHTSHIFT ), true );
 
-    EXPECT_EQ ( keyTable.isModifier ( "RCTRL" ), false );
-    EXPECT_EQ ( keyTable.isModifier ( "f" ), false );
     EXPECT_EQ ( keyTable.isModifier ( KEY_A ), false );
-}
-
-TEST ( KeyTableTest, modifierPairTest )
-{
-    hemiola::KeyTable keyTable;
-
-    EXPECT_EQ ( keyTable.isModifierPair ( "<RALT>", "</RALT>" ), true );
-    EXPECT_EQ ( keyTable.isModifierPair ( "<LALT>", "</RALT>" ), false );
-    EXPECT_EQ ( keyTable.isModifierPair ( "", "" ), false );
-    EXPECT_EQ ( keyTable.isModifierPair ( "<BACKSPACE/>", "<BACKSPACE/>" ), false );
-    EXPECT_EQ ( keyTable.isModifierPair ( "</RALT>", "<RALT>" ), true );
-    EXPECT_EQ ( keyTable.isModifierPair ( "</LALT>", "<RALT>" ), false );
-}
-
-TEST ( KeyTableTest, beginEndModifierTest )
-{
-    hemiola::KeyTable keyTable;
-
-    EXPECT_EQ ( keyTable.isBeginModifier ( "<RALT>" ), true );
-    EXPECT_EQ ( keyTable.isEndModifier ( "</RALT>" ), true );
-    EXPECT_EQ ( keyTable.isBeginModifier ( "</LALT>" ), false );
-    EXPECT_EQ ( keyTable.isEndModifier ( "<LALT>" ), false );
-
-    EXPECT_EQ ( keyTable.isBeginModifier ( "" ), false );
-    EXPECT_EQ ( keyTable.isEndModifier ( "" ), false );
-    EXPECT_EQ ( keyTable.isBeginModifier ( "<BACKSPACE/>" ), false );
-    EXPECT_EQ ( keyTable.isEndModifier ( "<BACKSPACE/>" ), false );
-    EXPECT_EQ ( keyTable.isBeginModifier ( "<BACKSPACE>" ), false );
-    EXPECT_EQ ( keyTable.isEndModifier ( "<BACKSPACE>" ), false );
 }

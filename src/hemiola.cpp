@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -66,15 +66,17 @@ try {
     using namespace hemiola;
     std::unique_lock lock ( mutex );
 
-    // TODO: Implement a config to get our devices and key maps
     auto input = std::make_shared<InputHID>();
     auto output = std::make_shared<OutputHID>();
     auto keys = std::make_shared<KeyTable>();
-    Hemiola hemiola ( keys );
+    auto chords = std::make_shared<KeyChords> ( keys );
 
     // open devices so they can be used
     input->open();
     output->open();
+
+    Hemiola hemiola ( keys, chords, output );
+    hemiola.run();
 
     KeyboardEvents eventHandler ( keys, input );
 
@@ -85,7 +87,7 @@ try {
         cv.notify_all();
     };
 
-    auto onEvent = [&output, &hemiola, &onError] ( KeyReport report, std::string keyRep ) {
+    auto onEvent = [&hemiola, &onError, &output] ( KeyReport report, unsigned int keyRep ) {
         LOG ( DEBUG, keyRep );
         try {
             output->write ( report );

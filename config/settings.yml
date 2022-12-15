@@ -1,0 +1,305 @@
+dup: "="
+plural: ";"
+past: ","
+chords:
+  about: abou
+  above: abov
+  add: ad
+  after: af
+  again: agin
+  air: air
+  all: al
+  almost: alm
+  along: alog
+  also: alo
+  always: alwy
+  an: an
+  and: and
+  animal: anim
+  another: anoh
+  answer: answr
+  any: any
+  are: ar
+  around: aroun
+  as: as
+  ask: ask
+  at: at
+  away: awy
+  back: bak
+  be: be
+  because: bc
+  been: ben
+  before: bef
+  began: bg + past
+  begin: bg
+  being: being
+  below: belo
+  between: betw
+  big: big
+  book: bok
+  both: both
+  boy: boy
+  but: but
+  by: by
+  call: cal
+  came: cae
+  can: can
+  car: car
+  carry: cary + dup
+  change: change
+  children: chilr
+  city: city
+  close: close
+  come: coe
+  could: could
+  country: countr
+  cut: cut
+  day: dy
+  did: di
+  different: dif
+  do: do
+  does: do + plural
+  don: don'
+  down: down
+  each: each
+  earth: e + dup
+  eat: eat
+  end: end
+  enough: enou
+  even: evn
+  every: evy
+  example: ex
+  eye: ey
+  face: face
+  family: fam
+  far: far
+  father: ftr
+  feet: fet
+  few: fet
+  find: fn
+  first: first
+  follow: folw
+  food: foc
+  for: fr
+  form: fm
+  found: foun
+  four: fou
+  from: from
+  get: gt
+  girl: girl
+  give: gi
+  go: go
+  good: god + dup
+  got: got
+  great: grt
+  group: grou
+  grow: gro
+  had: ha + past
+  hand: han
+  hard: har
+  has: ha
+  have: have
+  he: he
+  head: hc
+  hear: hea
+  hello: helo
+  help: hel
+  her: hr
+  here: he + dup
+  high: hig
+  him: him
+  his: his
+  home: home
+  house: house
+  how: how
+  idea: idea
+  if: if
+  important: imp
+  in: in
+  into: int
+  is: is
+  it: it
+  it's: "it'"
+  its: its
+  just: jus
+  keep: ke
+  kind: kind
+  know: kno
+  land: lad
+  large: larg
+  last: las
+  later: lvr
+  learn: lr
+  leave: leav + dup
+  left: lft
+  let: let
+  letter: ltr
+  life: lf
+  light: ligh
+  like: lik
+  line: lin
+  list: li
+  little: lite + dup
+  live: liv
+  long: lng
+  look: lok
+  made: make + past
+  make: mae
+  man: man
+  many: mny
+  may: may
+  me: me
+  mean: mean
+  men: men
+  might: miht
+  mile: mil
+  miss: mis + dup
+  more: mor
+  most: most
+  mother: mothr
+  mountain: mount + dup
+  move: moe
+  much: muh
+  must: must
+  my: my
+  name: ne
+  near: nr
+  need: ned
+  never: nvr
+  new: new
+  next: next
+  night: night
+  no: n + dup
+  not: not
+  now: now
+  number: num
+  of: of
+  off: of + dup
+  often: ofte
+  oil: ol + dup
+  old: old
+  on: on
+  once: once
+  one: one
+  only: oly
+  open: ope
+  or: or
+  other: othe
+  our: ou
+  out: out
+  over: ove
+  own: own
+  page: pg
+  paper: pae
+  part: par
+  people: pl
+  picture: pic
+  place: plac
+  plant: pln
+  play: play
+  point: pont
+  put: put
+  question: ques
+  quick: quik
+  quickly: quikly
+  quite: qute
+  read: rad
+  really: realy + dup
+  right: righ
+  river: riv
+  run: run
+  said: sai
+  same: same
+  saw: sw
+  say: s + dup
+  school: schol
+  sea: c + dup
+  second: sec
+  see: se
+  seem: sem
+  sentence: sentc
+  set: set
+  she: she
+  should: shoul
+  show: show
+  side: sid
+  small: smal
+  so: so
+  some: som
+  something: somethng
+  sometimes: someti
+  song: song
+  soon: son + dup
+  sound: soun
+  spell: spl
+  start: str + dup
+  state: se
+  still: sti + dup
+  stop: sto
+  story: str'
+  study: stdy
+  such: such
+  take: tke
+  talk: tlk
+  tell: let + dup
+  than: thn
+  that: th
+  the: the
+  their: thir
+  them: them
+  then: then
+  there: the
+  these: thes
+  they: they
+  thing: thing
+  think: think
+  this: this
+  those: those
+  thought: though + dup
+  three: thre + dup
+  through: thru
+  time: tim
+  to: to
+  together: togeh
+  too: to + dup
+  took: tok + dup
+  tree: tr + dup
+  try: try
+  turn: turn
+  two: two
+  under: unde
+  until: unt
+  up: up
+  us: us
+  use: use
+  very: vry
+  walk: walf
+  want: wan
+  was: is + past
+  watch: wat
+  water: wtr
+  way: way
+  we: we
+  well: wel + dup
+  went: wnt
+  were: wer
+  what: what
+  when: when
+  where: whr
+  which: whi
+  while: whil
+  white: white
+  who: wh
+  why: y + dup
+  will: wil
+  with: with
+  without: withu
+  word: word
+  work: wor
+  world: wrld
+  would: wld
+  write: writ
+  year: year
+  you: yu
+  young: yng
+  your: yr

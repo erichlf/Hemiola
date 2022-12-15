@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -20,6 +20,7 @@
 #pragma once
 
 #include "InputHID.h"
+#include "KeyReport.h"
 #include "KeyTable.h"
 
 #include <linux/input.h>
@@ -30,29 +31,6 @@
 
 namespace hemiola
 {
-    using KeyArray = std::array<uint8_t, 6>;
-    /*!
-     * @brief struct describing the current key press
-     */
-    struct KeyReport
-    {
-        /*!
-         * @modifier hex codes (bit 0 is L CTRL, bit 1 is L SHIFT, bit 2 is L ALT, bit 3 is L GUI,
-         *                      bit 4 is R CTRL, bit 5 is R SHIFT, bit 6 is R ALT, and bit 7 is R
-         *                      GUI).
-         */
-        uint8_t modifiers;
-        /*!
-         * @brief list of keys pressed with modifier (6 allowed)
-         */
-        KeyArray keys {};
-    };
-
-    /*!
-     * @brief comparison operator for KeyReport
-     */
-    bool operator== ( const KeyReport& lhs, const KeyReport& rhs );
-
     /*!
      * @brief class for capturing keyboard events
      */
@@ -72,7 +50,7 @@ namespace hemiola
          * @param onEvent function which will handle any key capture events
          * @param onError function which will handle any errors that arise
          */
-        void capture ( std::function<void ( KeyReport, std::string )> onEvent,
+        void capture ( std::function<void ( KeyReport, unsigned int )> onEvent,
                        std::function<void ( std::exception_ptr )> onError );
 
     private:
@@ -97,10 +75,9 @@ namespace hemiola
         KeyReport m_KeyReport;
 
         /*!
-         * @brief the string representation of the current key press/release
-         * @note non-modifers use a blank ("") representation for a release
+         * @brief current key press/release
          */
-        std::string m_KeyRep;
+        unsigned int m_KeyRep;
 
         /*
          * @brief object containing the key map

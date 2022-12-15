@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -54,30 +54,22 @@ namespace hemiola
          * @brief release the given key
          * @param key the key to be pressed
          * @param report the expected result
-         * @param key string representation of expected key press
          * @post the simulated key press and the expected result are saved to test data
          */
-        void press ( const unsigned short code,
-                     const KeyReport& report,
-                     const std::string& key = "" )
+        void press ( const unsigned short code, const KeyReport& report )
         {
-            addData ( input_event { .type = EV_KEY, .code = code, .value = EV_MAKE }, report, key );
+            addData ( input_event { .type = EV_KEY, .code = code, .value = EV_MAKE }, report );
         }
 
         /*!
          * @brief release the given key
          * @param key the key to be released
          * @param report the expected result
-         * @param key string representation of expected key release
          * @post the simulated key release and the expected result are saved to test data
          */
-        void release ( const unsigned short code,
-                       const KeyReport& report,
-                       const std::string& key = "" )
+        void release ( const unsigned short code, const KeyReport& report )
         {
-            addData ( input_event { .type = EV_KEY, .code = code, .value = EV_BREAK },
-                      report,
-                      key );
+            addData ( input_event { .type = EV_KEY, .code = code, .value = EV_BREAK }, report );
         }
 
         /*!
@@ -93,11 +85,9 @@ namespace hemiola
 
             KeyboardEvents keys ( keyTable, device );
             // all data should be passed to output initially
-            auto onEvent = [this] ( KeyReport report, std::string key ) {
+            auto onEvent = [this] ( KeyReport report, unsigned int key ) {
                 m_ReceivedReports.push ( report );
-                if ( !key.empty() ) {
-                    m_ReceivedKeys.push ( key );
-                }
+                m_ReceivedKeys.push ( key );
             };
 
             // the exception that will be thrown by keys
@@ -153,16 +143,13 @@ namespace hemiola
          * @brief add data a key press to the test data
          * @param event the key press to simulate
          * @param report the expected result
-         * @param key string representation of the key press
          * @post the simulated key press/release and the expected result are saved to test data
          */
-        void addData ( input_event event, KeyReport report, std::string key )
+        void addData ( input_event event, KeyReport report )
         {
             m_Data.push ( event );
             m_ExpectedReports.push ( report );
-            if ( !key.empty() ) {
-                m_ExpectedKeys.push ( key );
-            }
+            m_ExpectedKeys.push ( event.code );
         }
 
         /*!
@@ -176,11 +163,11 @@ namespace hemiola
         /*!
          * @brief the expected keys from simulated key presses
          */
-        std::queue<std::string> m_ExpectedKeys;
+        std::queue<unsigned int> m_ExpectedKeys;
         /*!
          * @brief the expected keys from simulated key presses
          */
-        std::queue<std::string> m_ReceivedKeys;
+        std::queue<unsigned int> m_ReceivedKeys;
         /*!
          * @brief any exception received during the simulation
          */
@@ -205,20 +192,17 @@ TEST ( KeyboardEventTest, KeyPressTest )
     // no modifiers
     test.press (
         KEY_5,
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x22, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "5" );
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x22, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release ( KEY_5, KeyReport {} );
 
     test.press (
         KEY_M,
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "m" );
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release ( KEY_M, KeyReport {} );
 
     test.press (
         KEY_BACKSLASH,
-        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x31, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "\\" );
+        KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x31, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release ( KEY_BACKSLASH, KeyReport {} );
 
     test.press (
@@ -240,54 +224,43 @@ TEST ( KeyboardEventTest, ModifierTest )
     // ctrl + alt + c
     test.press (
         KEY_LEFTALT,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "<LALT>" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.press ( KEY_RIGHTCTRL,
                  KeyReport { .modifiers = 0x04 | 0x10,
-                             .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-                 "<RCTRL>" );
+                             .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.press ( KEY_C,
                  KeyReport { .modifiers = 0x04 | 0x10,
-                             .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-                 "c" );
+                             .keys = KeyArray { 0x06, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release ( KEY_C,
                    KeyReport { .modifiers = 0x04 | 0x10,
                                .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release (
         KEY_LEFTALT,
-        KeyReport { .modifiers = 0x10, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "</LALT>" );
-    test.release ( KEY_RIGHTCTRL, KeyReport {}, "</RCTRL>" );
+        KeyReport { .modifiers = 0x10, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    test.release ( KEY_RIGHTCTRL, KeyReport {} );
 
     // alt + a + b + c + d + e + f
     test.press (
         KEY_LEFTALT,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "<LALT>" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.press (
         KEY_A,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "a" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.press (
         KEY_B,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x00, 0x00, 0x00, 0x00 } },
-        "b" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x00, 0x00, 0x00, 0x00 } } );
     test.press (
         KEY_C,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x00, 0x00, 0x00 } },
-        "c" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x00, 0x00, 0x00 } } );
     test.press (
         KEY_D,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x00, 0x00 } },
-        "d" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x00, 0x00 } } );
     test.press (
         KEY_E,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x00 } },
-        "e" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x00 } } );
     test.press (
         KEY_F,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } },
-        "f" );
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
     // no more than 6 keys can be pressed at once
     test.press (
         KEY_G,
@@ -312,30 +285,27 @@ TEST ( KeyboardEventTest, ModifierTest )
         KEY_E,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x09 } } );
     test.release ( KEY_F, KeyReport { .modifiers = 0x04, .keys = KeyArray {} } );
-    test.release ( KEY_LEFTALT, KeyReport {}, "</LALT>" );
+    test.release ( KEY_LEFTALT, KeyReport {} );
 
     // // shift + z
     test.press (
         KEY_LEFTSHIFT,
-        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "<LSHIFT>" );
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.press (
         KEY_Z,
-        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x1d, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "z" );
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x1d, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release ( KEY_Z, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
 
     // shift + a
     test.press (
         KEY_A,
-        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } },
-        "a" );
+        KeyReport { .modifiers = 0x02, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     test.release ( KEY_A, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
-    test.release ( KEY_LEFTSHIFT, KeyReport {}, "</LSHIFT>" );
+    test.release ( KEY_LEFTSHIFT, KeyReport {} );
 
     // shift was pressed but then released
-    test.press ( KEY_LEFTSHIFT, KeyReport { .modifiers = 0x02, .keys = KeyArray {} }, "<LSHIFT>" );
-    test.release ( KEY_LEFTSHIFT, KeyReport {}, "</LSHIFT>" );
+    test.press ( KEY_LEFTSHIFT, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
+    test.release ( KEY_LEFTSHIFT, KeyReport {} );
 
     test.run();
     test.checkException();
