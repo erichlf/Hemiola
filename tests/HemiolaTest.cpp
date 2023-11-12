@@ -85,13 +85,13 @@ TEST_F ( HemiolaTest, addKeyTest )
     this->addKey ( KEY_L );
     this->addKey ( KEY_A );
     EXPECT_EQ ( this->captured().size(), 7u );
-    EXPECT_EQ ( this->captured().count(KEY_H), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_E), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_M), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_I), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_O), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_L), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_H ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_E ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_M ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_I ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_O ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_L ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_A ), 1u );
 
     this->addKey ( KEY_SPACE );
     EXPECT_EQ ( this->captured().empty(), true );
@@ -103,7 +103,7 @@ TEST_F ( HemiolaTest, addKeyTest )
 
     this->addKey ( KEY_A );
     EXPECT_EQ ( this->captured().size(), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_A ), 1u );
 }
 
 TEST_F ( HemiolaTest, backspaceKeyTest )
@@ -112,7 +112,7 @@ TEST_F ( HemiolaTest, backspaceKeyTest )
     this->addKey ( KEY_A );
     this->addKey ( KEY_RIGHTSHIFT );
     EXPECT_EQ ( this->captured().size(), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_A ), 1u );
 
     this->addKey ( KEY_BACKSPACE );
     EXPECT_EQ ( this->captured().empty(), true );
@@ -122,12 +122,12 @@ TEST_F ( HemiolaTest, backspaceKeyTest )
     this->addKey ( KEY_B );
     this->addKey ( KEY_RIGHTSHIFT );
     EXPECT_EQ ( this->captured().size(), 2u );
-    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_B), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_A ), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_B ), 1u );
 
     this->addKey ( KEY_BACKSPACE );
     EXPECT_EQ ( this->captured().size(), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_A ), 1u );
 
     this->addKey ( KEY_RIGHTSHIFT );
     this->addKey ( KEY_RIGHTALT );
@@ -135,7 +135,7 @@ TEST_F ( HemiolaTest, backspaceKeyTest )
     this->addKey ( KEY_RIGHTALT );
     this->addKey ( KEY_RIGHTSHIFT );
     EXPECT_EQ ( this->captured().size(), 1u );
-    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+    EXPECT_EQ ( this->captured().count ( KEY_A ), 1u );
 
     this->addKey ( KEY_BACKSPACE );
     EXPECT_EQ ( this->captured().empty(), true );

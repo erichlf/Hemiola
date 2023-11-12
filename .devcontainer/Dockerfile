@@ -7,6 +7,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
+    clangd \
     clang-format \
     gdb \
     libicu-dev \
