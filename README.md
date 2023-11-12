@@ -14,6 +14,8 @@ things.
 - CMake >= v3.12
 - ICU4C
 
+We also provide a `Dockerfile` and `devcontainer` for convenience.
+
 ### Building on GNU/Linux and Unixes
 
 We first need to download the dependencies. Some may already be

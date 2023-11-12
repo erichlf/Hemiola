@@ -1,0 +1,35 @@
+{
+    "name": "hemiola",
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils": {
+            "configureZshAsDefaultShell": "true"
+        }
+    },
+    "mounts": [
+        "type=bind,source=${localEnv:HOME}/.zsh_history,target=/home/vscode/.zsh_history",
+        "type=bind,source=${localEnv:HOME}/.zsh_history,target=/home/vscode/.bash_history"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "github.vscode-github-actions",
+                "ms-azuretools.vscode-docker"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "bash",
+                        "icon": "terminal-bash"
+                    },
+                    "zsh": {
+                        "path": "zsh"
+                    }
+                }
+            }
+        }
+    }
+}
