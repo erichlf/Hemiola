@@ -62,10 +62,7 @@ namespace hemiola
          * @brief return a set of the currently captured keys
          * @return set of captured keys
          */
-        const std::unordered_map<unsigned int, TimePoint>& captured() const
-        {
-            return m_Captured;
-        };
+        const std::unordered_map<unsigned int, TimePoint>& captured() const { return m_Captured; };
 
         /*!
          * @brief Function which runs the timer and grabs keychords

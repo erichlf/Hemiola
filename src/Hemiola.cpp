@@ -132,23 +132,23 @@ void hemiola::Hemiola::run()
 
 void hemiola::Hemiola::deleteKey()
 {
-  // we should delete the most recent key that is not a modifier
-  unsigned int deleteKey = KEY_RESERVED;
-  TimePoint maxTime{};
-  for ( const auto& [key, value] : m_Captured ) {
-    // skip over modifers
-    if ( m_KeyTable->isModifier ( key ) ) {
-      continue;
+    // we should delete the most recent key that is not a modifier
+    unsigned int deleteKey = KEY_RESERVED;
+    TimePoint maxTime {};
+    for ( const auto& [key, value] : m_Captured ) {
+        // skip over modifers
+        if ( m_KeyTable->isModifier ( key ) ) {
+            continue;
+        }
+        if ( maxTime < value ) {
+            deleteKey = key;
+            maxTime = value;
+        }
     }
-    if ( maxTime < value ) {
-      deleteKey = key;
-      maxTime = value;
+
+    if ( deleteKey == KEY_RESERVED ) {
+        return;
     }
-  }
 
-  if ( deleteKey == KEY_RESERVED ) {
-    return;
-  }
-
-  m_Captured.erase ( deleteKey );
+    m_Captured.erase ( deleteKey );
 }
