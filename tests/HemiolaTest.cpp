@@ -26,27 +26,10 @@
 #include <fmt/ranges.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <string>
+#include <unordered_map>
 #include <vector>
-
-namespace
-{
-    /*!
-     * @brief Join the elements of a vector into a string
-     * @param cap_map A map containing values to be joined
-     * @return The values of the map joined as a string
-     */
-    std::string join ( std::unordered_map<unsigned int, hemiola::Hemiola::TimePoint> cap_map )
-    {
-        hemiola::KeyTable keyTable;
-        std::string joined {};
-        for ( const auto& [key, value] : cap_map ) {
-            joined = keyTable.charKeys ( key ) + joined;
-        }
-
-        return joined;
-    }
-}
 
 class TestOutputHID : public hemiola::OutputHID
 {
@@ -57,7 +40,8 @@ public:
     void open() override
     { /* no opt */
     }
-    void write ( const hemiola::KeyReport& /*report*/ ) const
+
+    void write ( const hemiola::KeyReport& /*report*/ ) const override
     { /* no opt */
     }
 };
@@ -77,7 +61,10 @@ protected:
 public:
     void addKey ( unsigned int key ) { m_Hemiola->addKey ( key ); }
 
-    std::string captured() { return join ( m_Hemiola->captured() ); }
+    const std::unordered_map<unsigned int, hemiola::Hemiola::TimePoint>& captured()
+    {
+        return m_Hemiola->captured();
+    }
 
 private:
     std::shared_ptr<hemiola::KeyTable> m_KeyTable;
@@ -88,8 +75,6 @@ private:
 
 TEST_F ( HemiolaTest, addKeyTest )
 {
-    using namespace std::string_literals;
-
     EXPECT_EQ ( this->captured().empty(), true );
 
     this->addKey ( KEY_H );
@@ -99,47 +84,62 @@ TEST_F ( HemiolaTest, addKeyTest )
     this->addKey ( KEY_O );
     this->addKey ( KEY_L );
     this->addKey ( KEY_A );
-    EXPECT_EQ ( this->captured(), "hemiola"s );
+    EXPECT_EQ ( this->captured().size(), 7u );
+    EXPECT_EQ ( this->captured().count(KEY_H), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_E), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_M), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_I), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_O), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_L), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+
     this->addKey ( KEY_SPACE );
-    EXPECT_EQ ( this->captured(), ""s );
+    EXPECT_EQ ( this->captured().empty(), true );
 
     this->addKey ( KEY_RIGHTCTRL );
     this->addKey ( KEY_C );
     this->addKey ( KEY_RIGHTCTRL );
-    EXPECT_EQ ( this->captured(), ""s );
+    EXPECT_EQ ( this->captured().empty(), true );
 
     this->addKey ( KEY_A );
-    EXPECT_EQ ( this->captured(), "a"s );
+    EXPECT_EQ ( this->captured().size(), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
 }
 
 TEST_F ( HemiolaTest, backspaceKeyTest )
 {
-    using namespace std::string_literals;
-
     this->addKey ( KEY_RIGHTSHIFT );
     this->addKey ( KEY_A );
     this->addKey ( KEY_RIGHTSHIFT );
-    EXPECT_EQ ( this->captured(), "a"s );
+    EXPECT_EQ ( this->captured().size(), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
 
     this->addKey ( KEY_BACKSPACE );
-    EXPECT_EQ ( this->captured(), ""s );
+    EXPECT_EQ ( this->captured().empty(), true );
 
     this->addKey ( KEY_RIGHTSHIFT );
     this->addKey ( KEY_A );
     this->addKey ( KEY_B );
     this->addKey ( KEY_RIGHTSHIFT );
-    EXPECT_EQ ( this->captured(), "ab"s );
+    EXPECT_EQ ( this->captured().size(), 2u );
+    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_B), 1u );
 
     this->addKey ( KEY_BACKSPACE );
-    EXPECT_EQ ( this->captured(), "a"s );
+    EXPECT_EQ ( this->captured().size(), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
 
     this->addKey ( KEY_RIGHTSHIFT );
     this->addKey ( KEY_RIGHTALT );
     this->addKey ( KEY_A );
     this->addKey ( KEY_RIGHTALT );
     this->addKey ( KEY_RIGHTSHIFT );
-    EXPECT_EQ ( this->captured(), "a"s );
+    EXPECT_EQ ( this->captured().size(), 1u );
+    EXPECT_EQ ( this->captured().count(KEY_A), 1u );
 
     this->addKey ( KEY_BACKSPACE );
-    EXPECT_EQ ( this->captured(), ""s );
+    EXPECT_EQ ( this->captured().empty(), true );
 }
+
+// TODO: add mock test to be sure other functionality is working like calls to
+// OutputHID
