@@ -41,7 +41,9 @@ hemiola::Hemiola::Hemiola ( std::shared_ptr<KeyTable> keyTable,
 
 hemiola::Hemiola::~Hemiola()
 {
-    m_TimerThread.join();
+    if ( m_TimerThread.joinable() ) {
+        m_TimerThread.join();
+    }
 }
 
 void hemiola::Hemiola::addKey ( const unsigned int key )
