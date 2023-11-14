@@ -54,7 +54,7 @@ target_include_directories(hemiolalib
 
 set_target_properties(hemiola
     PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     )
 target_compile_options(hemiola PRIVATE
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wconversion -Wno-psabi>
