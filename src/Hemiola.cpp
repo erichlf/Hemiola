@@ -153,4 +153,17 @@ void hemiola::Hemiola::deleteKey()
     }
 
     m_Captured.erase ( deleteKey );
+
+    // check to see if all keys are modifiers and then clear if they are
+    bool allModifiers = true;
+    for ( const auto& [key, value] : m_Captured ) {
+        if ( !m_KeyTable->isModifier ( key ) ) {
+            allModifiers = false;
+            break;
+        }
+    }
+
+    if ( allModifiers ) {
+        m_Captured.clear();
+    }
 }
