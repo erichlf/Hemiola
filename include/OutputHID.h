@@ -21,9 +21,7 @@
 
 #include "HID.h"
 
-#include <cstdint>
 #include <string>
-#include <vector>
 
 namespace hemiola
 {

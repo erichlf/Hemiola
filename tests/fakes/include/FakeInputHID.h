@@ -42,13 +42,13 @@ namespace hemiola
          * @brief open device for reading
          * @post device is opened and can be read from
          */
-        virtual void open() override;
+        void open() override;
 
         /*!
          * @brief close device
          * @post device has been closed and can no longer be read from
          */
-        virtual void close() override;
+        void close() override;
 
         /*!
          * @brief read event from device
@@ -56,7 +56,7 @@ namespace hemiola
          * @throw IoException if there is no more data to read
          * @assumption device has been opened for reading
          */
-        virtual void read ( input_event& event ) override;
+        void read ( input_event& event ) override;
 
         /*!
          * @brief sets the data to send to whatever calls read

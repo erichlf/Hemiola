@@ -19,11 +19,15 @@
 */
 #include "Exceptions.h"
 #include "FakeInputHID.h"
+#include "KeyReport.h"
 #include "KeyboardEvents.h"
+#include "Logger.h"
 #include "Utils.h"
 
 #include <gtest/gtest.h>
+#include <linux/input-event-codes.h>
 #include <linux/input.h>
+#include <spdlog/spdlog.h>
 
 #include <exception>
 #include <iostream>
@@ -45,22 +49,24 @@ public:
      * @brief press the given key
      * @param key the key to be pressed
      * @param report the expected result
+     * @param valid flag indicating if keypress is a valid keypress
      * @post the simulated key press and the expected result are saved to test data
      */
-    void press ( const unsigned short code, const KeyReport& report )
+    void press ( const unsigned short code, const KeyReport& report, bool valid = true )
     {
-        addData ( input_event { .type = EV_KEY, .code = code, .value = EV_MAKE }, report );
+        keyEvent ( code, report, true, valid );
     }
 
     /*!
      * @brief release the given key
      * @param key the key to be released
      * @param report the expected result
+     * @param valid flag indicating if keypress is a valid keypress
      * @post the simulated key release and the expected result are saved to test data
      */
-    void release ( const unsigned short code, const KeyReport& report )
+    void release ( const unsigned short code, const KeyReport& report, bool valid = true )
     {
-        addData ( input_event { .type = EV_KEY, .code = code, .value = EV_BREAK }, report );
+        keyEvent ( code, report, false );
     }
 
     /*!
@@ -82,7 +88,7 @@ public:
         };
 
         // the exception that will be thrown by keys
-        auto onError = [this] ( std::exception_ptr exc ) { m_E = exc; };
+        auto onError = [this] ( std::exception_ptr exc ) { m_Except = exc; };
 
         // normally this would be run in its own thread
         keys.capture ( onEvent, onError );
@@ -91,11 +97,11 @@ public:
     /*!
      * @brief check that the correct exception was received at the end of our simulation
      */
-    void checkException()
+    inline void checkException()
     {
-        if ( m_E != nullptr ) {
+        if ( m_Except != nullptr ) {
             try {
-                std::rethrow_exception ( m_E );
+                std::rethrow_exception ( m_Except );
             } catch ( const IoException& ex ) {
                 EXPECT_EQ ( ex.what(), std::string ( "No more data to read." ) );
                 EXPECT_EQ ( ex.code(), 42 );
@@ -110,7 +116,7 @@ public:
     /*!
      * @brief check if the simulated key presses and the expected results agree
      */
-    void checkData()
+    inline void checkData()
     {
         EXPECT_EQ ( m_ReceivedReports.size(), m_ExpectedReports.size() );
 
@@ -131,16 +137,36 @@ public:
 
 private:
     /*!
+     * @brief press/realse the given key
+     * @param key the key to be pressed
+     * @param report the expected result
+     * @param press flag indicating if this is a key press (true) or a release (false)
+     * @param valid flag indicating if keypress is a valid keypress
+     * @post the simulated key press and the expected result are saved to test data
+     */
+    void keyEvent ( const unsigned short code,
+                    const KeyReport& report,
+                    bool press,
+                    bool valid = true )
+    {
+        auto type_event = press ? EV_MAKE : EV_BREAK;
+        addData ( input_event { .type = EV_KEY, .code = code, .value = type_event },
+                  report,
+                  valid );
+    }
+
+    /*!
      * @brief add data a key press to the test data
      * @param event the key press to simulate
      * @param report the expected result
+     * @param valid flag indicating if keypress is a valid keypress
      * @post the simulated key press/release and the expected result are saved to test data
      */
-    void addData ( input_event event, KeyReport report )
+    void addData ( input_event event, KeyReport report, bool valid = true )
     {
         m_Data.push ( event );
         m_ExpectedReports.push ( report );
-        m_ExpectedKeys.push ( event.code );
+        m_ExpectedKeys.push ( valid ? event.code : 0u );
     }
 
     /*!
@@ -162,19 +188,30 @@ private:
     /*!
      * @brief any exception received during the simulation
      */
-    std::exception_ptr m_E;
+    std::exception_ptr m_Except;
     /*!
      * @brief key presses to be simulated
      */
     std::queue<input_event> m_Data;
 };
 
-TEST_F ( KeyboardEventTest, KeyPressTest )
+TEST_F ( KeyboardEventTest, InvalidKeyCodeTest )
 {
     // invalid scanCode
-    this->press ( 1029, KeyReport {} );
-    this->release ( 1029, KeyReport {} );
+    this->press ( 1029, KeyReport {}, false );
+    this->release ( 1029, KeyReport {}, false );
 
+    // add the above keys to the KeyboardEvent object
+    this->run();
+    // an exception will be thrown at the end of an event list because it looks like a keyboard
+    // disconnect
+    this->checkException();
+    // verify that all data was received
+    this->checkData();
+}
+
+TEST_F ( KeyboardEventTest, KeyPressTest )
+{
     // no modifiers
     this->press (
         KEY_5,
@@ -196,8 +233,12 @@ TEST_F ( KeyboardEventTest, KeyPressTest )
         KeyReport { .modifiers = 0x00, .keys = KeyArray { 0x45, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
     this->release ( KEY_F12, KeyReport {} );
 
+    // add the above keys to the KeyboardEvent object
     this->run();
+    // an exception will be thrown at the end of an event list because it looks like a keyboard
+    // disconnect
     this->checkException();
+    // verify that all data was received
     this->checkData();
 }
 
@@ -244,12 +285,6 @@ TEST_F ( KeyboardEventTest, ModifierTest )
         KEY_F,
         KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
     // no more than 6 keys can be pressed at once
-    this->press (
-        KEY_G,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
-    this->release (
-        KEY_G,
-        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
     // now release our keys
     this->release (
         KEY_A,
@@ -289,7 +324,72 @@ TEST_F ( KeyboardEventTest, ModifierTest )
     this->press ( KEY_LEFTSHIFT, KeyReport { .modifiers = 0x02, .keys = KeyArray {} } );
     this->release ( KEY_LEFTSHIFT, KeyReport {} );
 
+    // add the above keys to the KeyboardEvent object
     this->run();
+    // an exception will be thrown at the end of an event list because it looks like a keyboard
+    // disconnect
     this->checkException();
+    // verify that all data was received
+    this->checkData();
+}
+
+TEST_F ( KeyboardEventTest, OverflowTest )
+{
+    // alt + a + b + c + d + e + f + g
+    this->press (
+        KEY_LEFTALT,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    this->press (
+        KEY_A,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 } } );
+    this->press (
+        KEY_B,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x00, 0x00, 0x00, 0x00 } } );
+    this->press (
+        KEY_C,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x00, 0x00, 0x00 } } );
+    this->press (
+        KEY_D,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x00, 0x00 } } );
+    this->press (
+        KEY_E,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x00 } } );
+    this->press (
+        KEY_F,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
+    // no more than 6 keys can be pressed at once
+    this->press (
+        KEY_G,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } },
+        false );
+    this->release (
+        KEY_G,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 } },
+        false );
+    // now release our keys
+    this->release (
+        KEY_A,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x05, 0x06, 0x07, 0x08, 0x09 } } );
+    this->release (
+        KEY_B,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x06, 0x07, 0x08, 0x09 } } );
+    this->release (
+        KEY_C,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x07, 0x08, 0x09 } } );
+    this->release (
+        KEY_D,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x08, 0x09 } } );
+    this->release (
+        KEY_E,
+        KeyReport { .modifiers = 0x04, .keys = KeyArray { 0x00, 0x00, 0x00, 0x00, 0x00, 0x09 } } );
+    this->release ( KEY_F, KeyReport { .modifiers = 0x04, .keys = KeyArray {} } );
+    this->release ( KEY_LEFTALT, KeyReport {} );
+
+    // add the above keys to the KeyboardEvent object
+    this->run();
+    // an exception will be thrown at the end of an event list because it looks like a keyboard
+    // disconnect
+    this->checkException();
+    // verify that all data was received
     this->checkData();
 }

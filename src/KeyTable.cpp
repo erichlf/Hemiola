@@ -50,7 +50,7 @@ std::string hemiola::KeyTable::charKeys ( const unsigned int code ) const
     try {
         return m_CharKeys.at ( code );
     } catch ( ... ) {
-        LOG ( ERROR, "Invalid character key code: {}", code );
+        LOG ( WARN, "Key is not represented as a character: {}", code );
         return "";
     }
 }
@@ -60,7 +60,7 @@ std::string hemiola::KeyTable::modKeys ( const unsigned int code ) const
     try {
         return m_ModKeys.at ( code );
     } catch ( ... ) {
-        LOG ( ERROR, "Invalid modifier key code: {}", code );
+        LOG ( WARN, "Invalid modifier key code: {}", code );
         return "";
     }
 }
@@ -103,7 +103,7 @@ uint8_t hemiola::KeyTable::scanToHex ( const unsigned int code ) const
 uint8_t hemiola::KeyTable::modToHex ( const unsigned int code ) const
 {
     try {
-        return m_ModiferHex.at ( code );
+        return m_ModifierHex.at ( code );
     } catch ( ... ) {
         LOG ( ERROR, "Unknown modifier key code: {}", code );
         return 0x00;

@@ -72,7 +72,7 @@ namespace hemiola
          */
         inline bool isModifier ( const uint8_t code ) const
         {
-            return m_ModiferHex.count ( code ) > 0;
+            return m_ModifierHex.count ( code ) > 0;
         }
 
         /*!
@@ -498,7 +498,7 @@ namespace hemiola
             { KEY_RIGHTMETA, 0xE7 },  // Keyboard Right GUI
         };
 
-        const std::unordered_map<unsigned int, uint8_t> m_ModiferHex = {
+        const std::unordered_map<unsigned int, uint8_t> m_ModifierHex = {
             { KEY_LEFTCTRL, 0x01 },    // Keyboard Left Control
             { KEY_LEFTSHIFT, 0x02 },   // Keyboard Left Shift
             { KEY_LEFTALT, 0x04 },     // Keyboard Left Alt

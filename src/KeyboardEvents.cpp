@@ -99,11 +99,11 @@ void hemiola::KeyboardEvents::updateKeyState ( const input_event& event )
         if ( m_KeyTable->isScanModifier ( scanCode ) ) {  // turn off the current modifier
             const auto scanHex { m_KeyTable->modToHex ( scanCode ) };
             m_KeyReport.unsetModifier ( scanHex );
-            m_KeyRep = scanCode;
         } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
             const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
             m_KeyReport.unsetKey ( scanHex );
         }
+        m_KeyRep = scanCode;
 
         return;
     }
@@ -115,13 +115,21 @@ void hemiola::KeyboardEvents::updateKeyState ( const input_event& event )
 
     // we need to check if the key is a modifier first for this to work correctly
     if ( m_KeyTable->isModifier ( scanCode ) ) {
-        LOG ( DEBUG, "MAKE Modifer: {} -> {}", scanCode, m_KeyTable->modToHex ( scanCode ) );
+        LOG ( DEBUG,
+              "MAKE Modifer: {} -> {} -> {}",
+              m_KeyTable->modKeys ( scanCode ),
+              scanCode,
+              m_KeyTable->modToHex ( scanCode ) );
         const auto scanHex { m_KeyTable->modToHex ( scanCode ) };
         m_KeyReport.setModifier ( scanHex );
         m_KeyRep = scanCode;
     } else if ( m_KeyTable->isKeyValid ( scanCode ) ) {
         const auto scanHex { m_KeyTable->scanToHex ( scanCode ) };
-        LOG ( DEBUG, "MAKE key: {} -> {}", scanCode, scanHex );
+        LOG ( DEBUG,
+              "MAKE key: \"{}\" -> {} -> {}",
+              m_KeyTable->charKeys ( scanCode ),
+              scanCode,
+              scanHex );
         if ( !m_KeyReport.setKey ( scanHex ) ) {
             m_KeyRep = scanCode;
         }

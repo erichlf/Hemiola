@@ -26,7 +26,6 @@
 #include <fmt/ranges.h>
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <vector>
