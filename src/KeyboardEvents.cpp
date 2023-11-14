@@ -35,10 +35,6 @@
 
 using namespace hemiola;
 
-hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable )
-    : KeyboardEvents ( keyTable, std::make_shared<InputHID>() )
-{}
-
 hemiola::KeyboardEvents::KeyboardEvents ( std::shared_ptr<KeyTable> keyTable,
                                           std::shared_ptr<InputHID> device )
     : m_KeyReport {}

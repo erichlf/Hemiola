@@ -20,11 +20,11 @@
 #include "Hemiola.h"
 
 #include "Exceptions.h"
-#include "InputHID.h"
 #include "KeyTable.h"
+#include "Keyboard.h"
 #include "KeyboardEvents.h"
 #include "Logger.h"
-#include "OutputHID.h"
+#include "USBHID.h"
 
 #include <csignal>
 #include <cstdint>
@@ -66,8 +66,8 @@ try {
     using namespace hemiola;
     std::unique_lock lock ( mutex );
 
-    auto input = std::make_shared<InputHID>();
-    auto output = std::make_shared<OutputHID>();
+    auto input = std::make_shared<Keyboard>();
+    auto output = std::make_shared<USBHID>();
     auto keys = std::make_shared<KeyTable>();
     auto chords = std::make_shared<KeyChords> ( keys );
 

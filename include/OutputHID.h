@@ -55,6 +55,6 @@ namespace hemiola
          * @throw IoException if we are unable to write to device
          * @assumption device has been opened for writing
          */
-        virtual void write ( const KeyReport& report ) const;
+        virtual void write ( const KeyReport& report ) const = 0;
     };
 }  // namespace hemiola

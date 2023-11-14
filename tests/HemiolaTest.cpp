@@ -33,7 +33,12 @@
 class TestOutputHID : public hemiola::OutputHID
 {
 public:
-    TestOutputHID() {};
+    TestOutputHID() = default;
+    TestOutputHID ( const TestOutputHID& ) = delete;
+    TestOutputHID ( TestOutputHID&& ) = delete;
+    TestOutputHID& operator= ( const TestOutputHID& ) = delete;
+    TestOutputHID& operator= ( TestOutputHID&& ) = delete;
+
     ~TestOutputHID() = default;
 
     void open() override

@@ -19,7 +19,7 @@
 */
 #pragma once
 
-#include "HID.h"
+#include "InputHID.h"
 
 #include <string>
 
@@ -31,22 +31,20 @@ namespace hemiola
     /*!
      * @brief simple class handling communication with input device
      */
-    class InputHID : public HID
+    class Keyboard : public InputHID
     {
     public:
-        InputHID()
-            : HID()
-        {}
-        InputHID ( const InputHID& ) = delete;
-        InputHID ( InputHID&& ) = delete;
-        InputHID& operator= ( const InputHID& ) = delete;
-        InputHID& operator= ( InputHID&& ) = delete;
-        ~InputHID() = default;
+        Keyboard();
+        Keyboard ( const Keyboard& ) = delete;
+        Keyboard ( Keyboard&& ) = delete;
+        Keyboard& operator= ( const Keyboard& ) = delete;
+        Keyboard& operator= ( Keyboard&& ) = delete;
+        ~Keyboard() = default;
 
         /*!
          * @copydoc HID::open
          */
-        virtual void open() = 0;
+        void open() override;
 
         /*!
          * @brief read event from device
@@ -54,6 +52,13 @@ namespace hemiola
          * @throw IoException if we are unable to read from device
          * @assumption device has been opened for reading
          */
-        virtual void read ( input_event& event ) = 0;
+        void read ( input_event& event ) override;
+
+    private:
+        /*!
+         * @brief look up keyboard
+         * @throw KeyboardException if a keyboard cannot be found
+         */
+        std::string getKeyboard();
     };
 }  // namespace hemiola

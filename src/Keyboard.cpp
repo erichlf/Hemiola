@@ -17,7 +17,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include "InputHID.h"
+#include "Keyboard.h"
 
 #include "Exceptions.h"
 #include "Logger.h"
@@ -38,18 +38,18 @@
 using namespace hemiola;
 using ScoredHID = std::pair<std::string, unsigned short>;
 
-hemiola::InputHID::InputHID()
-    : HID()
+hemiola::Keyboard::Keyboard()
+    : InputHID()
 {}
 
-void hemiola::InputHID::open()
+void hemiola::Keyboard::open()
 {
-    m_HIDString = getInputHID();
+    m_HIDString = getKeyboard();
 
     HID::open ( O_RDONLY );
 }
 
-std::string hemiola::InputHID::getInputHID()
+std::string hemiola::Keyboard::getKeyboard()
 {
     // better be safe than sory: while running other programs, switch user to nobody from root
     if ( setegid ( 65534 ) < 0 ) {
@@ -144,7 +144,7 @@ std::string hemiola::InputHID::getInputHID()
     return devices.top().first;
 }
 
-void hemiola::InputHID::read ( input_event& event )
+void hemiola::Keyboard::read ( input_event& event )
 {
     assert ( m_Opened );
 

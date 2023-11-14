@@ -15,12 +15,14 @@ add_library(hemiolalib
     SHARED
     src/Hemiola.cpp
     src/HID.cpp
-    src/InputHID.cpp
+    src/Keyboard.cpp
     src/KeyChords.cpp
     src/KeyTable.cpp
     src/KeyboardEvents.cpp
     src/Logger.cpp
-    src/OutputHID.cpp)
+    src/OutputHID.cpp
+    src/USBHID.cpp
+    )
 
 add_dependencies(hemiolalib ${EXTERNAL_DEPENDENCIES})
 

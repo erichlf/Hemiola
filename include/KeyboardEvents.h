@@ -37,7 +37,6 @@ namespace hemiola
     class KeyboardEvents
     {
     public:
-        explicit KeyboardEvents ( std::shared_ptr<KeyTable> keyTable );
         KeyboardEvents ( std::shared_ptr<KeyTable> keyTable, std::shared_ptr<InputHID> device );
         KeyboardEvents ( const KeyboardEvents& ) = delete;
         KeyboardEvents ( KeyboardEvents&& ) = delete;

@@ -17,43 +17,43 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#pragma once
+#include "USBHID.h"
 
-#include "HID.h"
+#include "Exceptions.h"
+#include "KeyboardEvents.h"
+#include "Logger.h"
 
-#include <string>
+#include <fcntl.h>
+#include <fmt/ranges.h>
+#include <linux/input.h>
+#include <unistd.h>
 
-// forward declaration
-struct input_event;
+#include <cassert>
+#include <vector>
 
-namespace hemiola
+using namespace hemiola;
+
+hemiola::USBHID::USBHID ( const std::string& device )
+    : OutputHID ( device )
+{}
+
+hemiola::USBHID::~USBHID()
 {
-    /*!
-     * @brief simple class handling communication with input device
-     */
-    class InputHID : public HID
-    {
-    public:
-        InputHID()
-            : HID()
-        {}
-        InputHID ( const InputHID& ) = delete;
-        InputHID ( InputHID&& ) = delete;
-        InputHID& operator= ( const InputHID& ) = delete;
-        InputHID& operator= ( InputHID&& ) = delete;
-        ~InputHID() = default;
+    // make sure all key presses are released
+    write ( KeyReport {} );
+}
 
-        /*!
-         * @copydoc HID::open
-         */
-        virtual void open() = 0;
+void hemiola::USBHID::write ( const KeyReport& report ) const
+{
+    assert ( m_Opened );
 
-        /*!
-         * @brief read event from device
-         * @param event input_event that we are going to save
-         * @throw IoException if we are unable to read from device
-         * @assumption device has been opened for reading
-         */
-        virtual void read ( input_event& event ) = 0;
-    };
-}  // namespace hemiola
+    LOG ( DEBUG, "Sending Report: {}, ({})", report.modifiers, fmt::join ( report.keys, ", " ) );
+    const auto data = std::vector<uint8_t> { report.modifiers, 0x00,
+                                             report.keys [0],  report.keys [1],
+                                             report.keys [2],  report.keys [3],
+                                             report.keys [4],  report.keys [5] };
+
+    if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() ) <= 0 ) {
+        throw IoException ( "Unable to write to output device", errno );
+    }
+}
