@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -19,41 +19,37 @@
 */
 #pragma once
 
-#include "HID.h"
+#include "OutputHID.h"
 
 #include <string>
 
-// forward declaration
-struct input_event;
-
 namespace hemiola
 {
+    // forward declarations
+    struct KeyReport;
+
     /*!
      * @brief simple class handling communication with input device
      */
-    class InputHID : public HID
+    class USBHID : public OutputHID
     {
     public:
-        InputHID()
-            : HID()
-        {}
-        InputHID ( const InputHID& ) = delete;
-        InputHID ( InputHID&& ) = delete;
-        InputHID& operator= ( const InputHID& ) = delete;
-        InputHID& operator= ( InputHID&& ) = delete;
-        ~InputHID() = default;
+        /*!
+         * @copydoc HID::HID(const std::string&)
+         */
+        explicit USBHID ( const std::string& device = "/dev/hidg0" );
+        USBHID ( const USBHID& ) = delete;
+        USBHID ( USBHID&& ) = delete;
+        USBHID& operator= ( const USBHID& ) = delete;
+        USBHID& operator= ( USBHID&& ) = delete;
+        ~USBHID();
 
         /*!
-         * @copydoc HID::open
+         * @brief write scan code to hid
+         * @param report byte data for the keypress to send to HID output
+         * @throw IoException if we are unable to write to device
+         * @assumption device has been opened for writing
          */
-        virtual void open() = 0;
-
-        /*!
-         * @brief read event from device
-         * @param event input_event that we are going to save
-         * @throw IoException if we are unable to read from device
-         * @assumption device has been opened for reading
-         */
-        virtual void read ( input_event& event ) = 0;
+        void write ( const KeyReport& report ) const override;
     };
 }  // namespace hemiola

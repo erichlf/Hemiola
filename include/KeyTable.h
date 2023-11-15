@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -39,17 +39,17 @@ namespace hemiola
     class KeyTable
     {
     public:
-        KeyTable() = default;
+        KeyTable();
         ~KeyTable() = default;
 
         /*!
          * @brief convert a scan code (keyboard position) to the corresponding hex value
-         * @param code the keyboard position to convert to hex
+         * @param key the keyboard position to convert to hex
          * @return the hex value corresponding to the scan code
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t scanToHex ( const unsigned int code ) const;
+        uint8_t scanToHex ( const unsigned int key ) const;
 
         /*!
          * @brief convert a scan code (keyboard position) to the corresponding modifier hex value
@@ -58,16 +58,21 @@ namespace hemiola
          * @note see the follow pdf for further details
          *       https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
          */
-        uint8_t modToHex ( const unsigned int code ) const;
+        uint8_t modToHex ( const unsigned int key ) const;
+
+        /*!
+         * @brief return the key representation for a key release
+         */
+        inline unsigned int keyRelease() const { return KEY_RESERVED; }
 
         /*!
          * @brief determine if the scan code is a modifier key
          * @param code to check
          * @return true if the scan code is a modifier key
          */
-        bool isModifier ( const unsigned int code ) const
+        inline bool isModifier ( const uint8_t code ) const
         {
-            return ( m_ModiferHex.count ( code ) != 0 );
+            return m_ModifierHex.count ( code ) > 0;
         }
 
         /*!
@@ -75,32 +80,29 @@ namespace hemiola
          * @param string to check
          * @return true if the scan code is a modifier key
          */
-        bool isModifier ( const std::string& key ) const;
-
-        /*!
-         * @brief determine if two given modifiers are beginning and ending matches
-         * @param first beginning or ending modifier to verify against
-         * @param second beginning or ending modifiers to verify is the matching to first
-         * @return true if the modifiers are a beginning and ending pair. If either first or second
-         * are not a modifier then this returns false
-         */
-        bool isModifierPair ( const std::string& first, const std::string& second ) const;
+        inline bool isScanModifier ( const unsigned int key ) const
+        {
+            return m_ModKeys.count ( key ) > 0;
+        };
 
         /*!
          * @brief determine if the scan code is a character key
          * @param code to check
          * @return true if the scan code is a character key
          */
-        bool isCharKey ( const unsigned int code ) const { return m_HexValues.count ( code ) != 0; }
+        inline bool isCharKey ( const unsigned int key ) const
+        {
+            return m_CharKeys.count ( key ) > 0;
+        }
 
         /*!
          * @brief determine if the scan code is a valid key in our keytable
          * @param code to check
          * @return true if the scan code is a valid key
          */
-        bool isKeyValid ( const unsigned int code ) const
+        inline bool isKeyValid ( const unsigned int key ) const
         {
-            return isCharKey ( code ) || isModifier ( code );
+            return m_HexValues.count ( key ) > 0 || isScanModifier ( key );
         }
 
         /*!
@@ -108,7 +110,7 @@ namespace hemiola
          * @param code the scan code from key press
          * @return string representing the scan code or empty string if not a valid key code
          */
-        std::string charKeys ( unsigned int code ) const;
+        std::string charKeys ( const unsigned int key ) const;
 
         /*!
          * @brief get the modifier key string corresponding to a scan code
@@ -116,7 +118,7 @@ namespace hemiola
          * @return string representing the the modifier for scan code or empty string if not a valid
          * key code
          */
-        std::string modKeys ( const unsigned int code ) const;
+        std::string modKeys ( const unsigned int key ) const;
 
         /*!
          * @brief get the beginning modifier string corresponding to a scan code
@@ -124,7 +126,7 @@ namespace hemiola
          * @return string representing the beginning modifier for a scan code or empty string if not
          * a valid key code
          */
-        std::string beginModKey ( const unsigned int code ) const;
+        std::string beginModKey ( const uint8_t code ) const;
 
         /*!
          * @brief get the ending modifier string corresponding to a scan code
@@ -132,26 +134,19 @@ namespace hemiola
          * @return string representing the ending modifier for a scan code or empty string if not a
          * valid key code
          */
-        std::string endModKey ( const unsigned int code ) const;
+        std::string endModKey ( const uint8_t code ) const;
 
         /*!
-         * @brief check if the key is a begin modifier
-         * @param key The string representation to check if it is a begin modifier
-         * @return true if the representation is a begin modifier
+         * @brief Get the key code for the given key string representation
+         * @param key The string representation to look up
+         * @return key code corresponding to the key string representation, or KEY_RESERVED
          */
-        bool isBeginModifier ( const std::string& key ) const;
-
-        /*!
-         * @brief check if the key is a end modifier
-         * @param key The string representation to check if it is a end modifier
-         * @return true if the representation is a end modifier
-         */
-        bool isEndModifier ( const std::string& key ) const;
+        unsigned int getKeyCode ( const std::string& key ) const;
 
     private:
         /*!
          * @brief check if the key is a modifier matching the predicate
-         * @param key The string representation to check if it is a modifier matching the predicate
+         * @param key The key code to check if it is a modifier matching the predicate
          * @param predicate The predicate for checking the modifier
          * @return true if the modifier matches the predicate
          */
@@ -162,7 +157,7 @@ namespace hemiola
         /*!
          * @brief Character Keys
          */
-        std::unordered_map<int, std::string> m_CharKeys = {
+        std::unordered_map<unsigned int, std::string> m_CharKeys = {
             { KEY_A, "a" },  // Keyboard a and A
             { KEY_B, "b" },  // Keyboard b and B
             { KEY_C, "c" },  // Keyboard c and C
@@ -223,10 +218,15 @@ namespace hemiola
         };
 
         /*!
+         * Reverse lookup for the character map;
+         */
+        std::unordered_map<std::string, unsigned int> m_KeyCodeMap;
+
+        /*!
          * @brief Function Keys these will have slightly different representation since
          *        they have a begin and an end, e.g. <LCTRL></LCTRL>
          */
-        std::unordered_map<int, std::string> m_ModKeys {
+        std::unordered_map<unsigned int, std::string> m_ModKeys {
             { KEY_LEFTCTRL, "LCTRL" },     // Keyboard Left Control
             { KEY_LEFTSHIFT, "LSHIFT" },   // Keyboard Left Shift
             { KEY_LEFTALT, "LALT" },       // Keyboard Left Alt
@@ -241,7 +241,7 @@ namespace hemiola
          * @brief map of key code to hex value for key reports
          */
         // TODO: update this from key map
-        std::unordered_map<int, uint8_t> m_HexValues = {
+        std::unordered_map<unsigned int, uint8_t> m_HexValues = {
             /**
              * Scan codes - last N slots in the HID report (usually 6).
              * 0x00 if no key pressed.
@@ -498,7 +498,7 @@ namespace hemiola
             { KEY_RIGHTMETA, 0xE7 },  // Keyboard Right GUI
         };
 
-        const std::unordered_map<int, uint8_t> m_ModiferHex = {
+        const std::unordered_map<unsigned int, uint8_t> m_ModifierHex = {
             { KEY_LEFTCTRL, 0x01 },    // Keyboard Left Control
             { KEY_LEFTSHIFT, 0x02 },   // Keyboard Left Shift
             { KEY_LEFTALT, 0x04 },     // Keyboard Left Alt

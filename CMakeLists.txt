@@ -13,14 +13,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 ##################  create a hemiola library ##################
 add_library(hemiolalib
     SHARED
-    src/Anagrammer.cpp
     src/Hemiola.cpp
     src/HID.cpp
-    src/InputHID.cpp
+    src/Keyboard.cpp
+    src/KeyChords.cpp
     src/KeyTable.cpp
     src/KeyboardEvents.cpp
     src/Logger.cpp
-    src/OutputHID.cpp)
+    src/OutputHID.cpp
+    src/USBHID.cpp
+    )
 
 add_dependencies(hemiolalib ${EXTERNAL_DEPENDENCIES})
 
@@ -54,10 +56,10 @@ target_include_directories(hemiolalib
 
 set_target_properties(hemiola
     PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     )
 target_compile_options(hemiola PRIVATE
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wno-psabi>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror -Wconversion -Wno-psabi>
     )
 
 find_package(GTest 1.8)

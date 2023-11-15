@@ -1,3 +1,7 @@
 {
-  "ignore": ["**/tests/**", "**/build/**", "**/.git/**", "**/.github/**"]
+  "ignore": [
+    "**/build/**",
+    "**/.git/**",
+    "**/.github/**"
+  ]
 }

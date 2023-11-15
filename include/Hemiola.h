@@ -1,6 +1,6 @@
 /*
   MIT License
-  Copyright (c) 2021 Erich L Foster
+  Copyright (c) 2021-2022 Erich L Foster
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -18,11 +18,17 @@
   SOFTWARE.
 */
 
-#include "Anagrammer.h"
+#include "KeyChords.h"
 #include "KeyTable.h"
+#include "OutputHID.h"
 
+#include <chrono>
 #include <memory>
+#include <mutex>
+#include <set>
 #include <string>
+#include <thread>
+#include <unordered_map>
 #include <vector>
 
 namespace hemiola
@@ -33,26 +39,35 @@ namespace hemiola
     class Hemiola
     {
     public:
-        explicit Hemiola ( std::shared_ptr<KeyTable> keyTable );
+        using TimePoint = std::chrono::steady_clock::time_point;
+
+        Hemiola ( std::shared_ptr<KeyTable> keyTable,
+                  std::shared_ptr<KeyChords> keyChords,
+                  std::shared_ptr<OutputHID> output );
         Hemiola ( const Hemiola& ) = delete;
         Hemiola ( Hemiola&& ) = delete;
         Hemiola& operator= ( const Hemiola& ) = delete;
         Hemiola& operator= ( Hemiola&& ) = delete;
-        ~Hemiola() = default;
+        ~Hemiola();
 
         /*!
          * @brief add the key press to the captured string
-         * @param key String representation of key press
-         * @post key press is added to captured keys, and if a word boundary is detected the
-         * captured string word is processed for anagrams
+         * @param key representation of key press
+         * @post if key presses occur in succession in less than the given threshold the captured
+         * keys are converted to a word and out put to the output device
          */
-        void addKey ( const std::string& key );
+        void addKey ( const unsigned int key );
 
         /*!
-         * @brief return a vector of the currently captured keys
-         * @return vector of captured keys
+         * @brief return a set of the currently captured keys
+         * @return set of captured keys
          */
-        const std::vector<std::string>& captured() const { return m_Captured; };
+        const std::unordered_map<unsigned int, TimePoint>& captured() const { return m_Captured; };
+
+        /*!
+         * @brief Function which runs the timer and grabs keychords
+         */
+        void run();
 
     private:
         /*!
@@ -64,12 +79,7 @@ namespace hemiola
         /*!
          * @brief the currently captured text
          */
-        std::vector<std::string> m_Captured;
-
-        /*!
-         * @brief determines anagrams of m_Captured
-         */
-        Anagrammer m_Anagrammer;
+        std::unordered_map<unsigned int, TimePoint> m_Captured;
 
         /*!
          * @brief key table describing character representations
@@ -77,9 +87,28 @@ namespace hemiola
         std::shared_ptr<KeyTable> m_KeyTable;
 
         /*!
-         * @brief flag indicating if we should be capturing text
+         * @brief map between chords and words
          */
-        bool m_DontCapture;
+        std::shared_ptr<KeyChords> m_KeyChords;
+
+        /*!
+         * @brief device to out put keys to
+         */
+        std::shared_ptr<OutputHID> m_Output;
+
+        /*!
+         * @brief Sequence of modifiers received.
+         */
+        std::vector<unsigned int> m_ModSequence;
+
+        // Time threshold for outputting the key codes
+        std::chrono::milliseconds m_TimeThreshold;
+
+        // Thread that runs the timer loop
+        std::thread m_TimerThread;
+
+        // Mutex to protect access to the shared data structures
+        std::mutex m_Mutex;
     };
 
 }

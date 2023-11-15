@@ -21,53 +21,44 @@
 
 #include "InputHID.h"
 
-#include <queue>
+#include <string>
+
+// forward declaration
+struct input_event;
 
 namespace hemiola
 {
     /*!
-     * @brief Class which spoof InputHID for testing purposes
+     * @brief simple class handling communication with input device
      */
-    class FakeInputHID : public InputHID
+    class Keyboard : public InputHID
     {
     public:
-        FakeInputHID();
-        FakeInputHID ( const FakeInputHID& ) = delete;
-        FakeInputHID ( FakeInputHID&& ) = delete;
-        FakeInputHID& operator= ( const FakeInputHID& ) = delete;
-        FakeInputHID& operator= ( FakeInputHID&& ) = delete;
-        ~FakeInputHID() = default;
+        Keyboard();
+        Keyboard ( const Keyboard& ) = delete;
+        Keyboard ( Keyboard&& ) = delete;
+        Keyboard& operator= ( const Keyboard& ) = delete;
+        Keyboard& operator= ( Keyboard&& ) = delete;
+        ~Keyboard() = default;
 
         /*!
-         * @brief open device for reading
-         * @post device is opened and can be read from
+         * @copydoc HID::open
          */
         void open() override;
 
         /*!
-         * @brief close device
-         * @post device has been closed and can no longer be read from
-         */
-        void close() override;
-
-        /*!
          * @brief read event from device
          * @param event input_event that we are going to save
-         * @throw IoException if there is no more data to read
+         * @throw IoException if we are unable to read from device
          * @assumption device has been opened for reading
          */
         void read ( input_event& event ) override;
 
-        /*!
-         * @brief sets the data to send to whatever calls read
-         * @param events the events to stream
-         */
-        void setData ( const std::queue<input_event>& events );
-
     private:
         /*!
-         * @brief data to be output from read
+         * @brief look up keyboard
+         * @throw KeyboardException if a keyboard cannot be found
          */
-        std::queue<input_event> m_Data;
+        std::string getKeyboard();
     };
 }  // namespace hemiola

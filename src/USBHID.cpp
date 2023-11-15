@@ -17,40 +17,43 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#pragma once
+#include "USBHID.h"
 
-#include <string>
-#include <unordered_map>
+#include "Exceptions.h"
+#include "KeyboardEvents.h"
+#include "Logger.h"
+
+#include <fcntl.h>
+#include <fmt/ranges.h>
+#include <linux/input.h>
+#include <unistd.h>
+
+#include <cassert>
 #include <vector>
 
-namespace hemiola
+using namespace hemiola;
+
+hemiola::USBHID::USBHID ( const std::string& device )
+    : OutputHID ( device )
+{}
+
+hemiola::USBHID::~USBHID()
 {
-    /*!
-     * @brief class for determining the anagrams of a given string
-     */
-    class Anagrammer
-    {
-    public:
-        Anagrammer() = default;
-        Anagrammer ( const Anagrammer& ) = delete;
-        Anagrammer ( Anagrammer&& ) = delete;
-        Anagrammer& operator= ( const Anagrammer& ) = delete;
-        Anagrammer& operator= ( Anagrammer&& ) = delete;
-        ~Anagrammer() = default;
+    // make sure all key presses are released
+    write ( KeyReport {} );
+}
 
-        /*!
-         * @brief insert word into data structure
-         */
-        void insert ( const std::string& word );
+void hemiola::USBHID::write ( const KeyReport& report ) const
+{
+    assert ( m_Opened );
 
-        /*!
-         * @brief lookup up anagrams for given string
-         * @param letters string to find anagrams for
-         * @return vector containing anagrams
-         */
-        std::vector<std::string> lookup ( std::string letters ) const;
+    LOG ( DEBUG, "Sending Report: {}, ({})", report.modifiers, fmt::join ( report.keys, ", " ) );
+    const auto data = std::vector<uint8_t> { report.modifiers, 0x00,
+                                             report.keys [0],  report.keys [1],
+                                             report.keys [2],  report.keys [3],
+                                             report.keys [4],  report.keys [5] };
 
-    private:
-        std::unordered_map<std::string, std::vector<std::string>> m_Anagrams;
-    };
-}  // namespace hemiola
+    if ( ::write ( m_HIDId, data.data(), sizeof ( uint8_t ) * data.size() ) <= 0 ) {
+        throw IoException ( "Unable to write to output device", errno );
+    }
+}
